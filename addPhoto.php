@@ -1,4 +1,5 @@
 <?php
+
 include 'database_info.php';
 //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
 $mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
@@ -6,8 +7,18 @@ $mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
 if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-//echo "Connected successfully\r\n";
-functon post($mysqli){
+//echo "Connected successfully";
+function post($mysqli){
+    $inclinazione = $_POST['inclinazione'];
+    $angolazione = $_POST['angolazione'];
+    $risoluzione = $_POST['inclinazione'];
+    $luce = $_POST['luce'];
+
+    $attr_array = array($inclinazione, $angolazione, $risoluzione, $luce);
+
+    $ingredienti = $_POST['ingredienti'];
+
+
     //get data via post
     //i seguenti dati sono di test - in seguito verranno reperiti via POST
     $photo_desc = "una gran bella foto";
@@ -30,23 +41,31 @@ functon post($mysqli){
             }
         }
     }
+
     //get last id inserted - ottendo l'ultimo id usato per identificare le foto, in modo da costruire poi il nome della foto
     //che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
+    $current_photo_id = 0;
+
     $sql = "SELECT MAX(ID) FROM FOTO";
     $result = mysqli_query($mysqli, $sql);
-    $row = $result->fetch_assoc();
-    $current_photo_id =  $row["MAX(ID)"] + 1;
-
+    if($result != NULL) {
+      $row = $result->fetch_assoc();
+      $current_photo_id =  $row["MAX(ID)"] + 1;
+    }
 
     //load photo - DA COMPLETARE!!
     //TODO make the photo name like "photo"+current_photo_id
-    if(isset($_FILES['photo'])){
+
+    //echo var_dump($_FILES['immagine']) . "<br>";
+    if(isset($_FILES['immagine'])){
         $errors= array();
-        $file_name = $_FILES['photo']['name'];
-        $file_size =$_FILES['photo']['size'];
-        $file_tmp =$_FILES['photo']['tmp_name'];
-        $file_type=$_FILES['photo']['type'];
-        $file_ext=strtolower(end(explode('.',$_FILES['photo']['name'])));
+
+        $file_name = "foto".$current_photo_id;
+        $file_tmp =$_FILES['immagine']['tmp_name'];
+
+        //check if image
+        $file_type=$_FILES['immagine']['type'];
+        $file_ext=strtolower(end(explode('.',$_FILES['immagine']['name'])));
         $expensions= array("jpeg","jpg","png");
         if(in_array($file_ext,$expensions)=== false){
             $errors[]="extension not allowed, please choose a JPEG or PNG file.";
@@ -55,8 +74,10 @@ functon post($mysqli){
             $errors[]='File size must be excately 5 MB';
         }
         if(empty($errors)==true){
-            move_uploaded_file($file_tmp,"photos/".$file_name);
-            echo "Success";
+
+          //TODO uploading file to dir not working
+
+          echo var_dump(move_uploaded_file($_FILES['userfile']['tmp_name'], __DIR__."/foto/".$file_name));
         }else{
             print_r($errors);
         }
@@ -74,7 +95,9 @@ functon post($mysqli){
     $stmt -> bind_param("ii", $current_photo_id, $tag_id);
     $stmt -> execute();
     }
+
 }
+
 //close connection
 mysqli_close($mysqli);
 //insert description and photo data with BLOB
@@ -115,7 +138,7 @@ $stmt->close();
     <!-- Custom Fonts -->
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <script>
-        setTimeout("location.href = 'index.html';",3000);
+        setTimeout("location.href = 'index.html';",5000);
     </script>
 </head>
 
