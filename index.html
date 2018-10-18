@@ -114,151 +114,173 @@
 
                         <div class="form-group">
                             <label>Immagine: </label>
-                            <input type="file" name="immagine">
+                            <input type="file" name="immagine" accept="image/gif, image/jpeg, image/png" onchange="readURL(this);"><br>
+                            
                         </div>
+                        <script>
+                            function readURL(input) {
+                                if (input.files && input.files[0]) {
+                                    var reader = new FileReader();
+
+                                    reader.onload = function (e) {
+                                        $('#imgPreview')
+                                            .attr('src', e.target.result)
+                                    };
+
+                                    reader.readAsDataURL(input.files[0]);
+                                }
+                            }
+                        </script>
                         
-
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Inclinazione</label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="inclinazione" value="si" checked="">Inclinata
-                                        </label>
+                                <img id="imgPreview" class="img-responsive" src="defaultIMG.jpg" style="height:auto; max-width:100%" />
+                            </div>
+                            <div class="col-md-8">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Inclinazione</label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="inclinazione" value="si" checked="">Inclinata
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="inclinazione" value="no">Non inclinata
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="inclinazione" value="no">Non inclinata
-                                        </label>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Angolazione</label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="angolazione" value="si" checked="">Angolata
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="angolazione" value="no">Non angolata
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Testo</label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="testoPresente" value="si" checked="">Presente
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="testoPresente" value="no">Non presente
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div> 
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Angolazione</label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="angolazione" value="si" checked="">Angolata
-                                        </label>
+                        
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Luce</label>
+                                            <select class="form-control">
+                                                <option>Poca luce</option>
+                                                <option>Luce ottimale</option>
+                                                <option>Troppa luce</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="angolazione" value="no">Non angolata
-                                        </label>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Etichetta</label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="etichettaPiana" value="si" checked="">Piana
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="etichettaPiana" value="no">Non piana
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Caratteri </label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="caratteriDanneggiati" value="si" checked="">Opachi/Danneggiati
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="caratteriDanneggiati" value="no">Nitidi
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>    
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Testo</label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="testoPresente" value="si" checked="">Presente
-                                        </label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Immagine </label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="immagineNitida" value="si" checked="">Nitida
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="immagineNitida" value="no">Sfuocata
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="testoPresente" value="no">Non presente
-                                        </label>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Mossa</label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="mossa" value="si" checked="">Foto mossa
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="mossa" value="no">Foto non mossa
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Risoluzione della foto</label>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="risoluzione" value="si" checked="">Alta risoluzione
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                        <label>Ingredienti</label>
+                                        <textarea class="form-control" name="ingredienti" rows="3" placeholder="Per unificare gli stili dividere gli ingredienti con una virgola"></textarea>
+                                    </div>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Luce</label>
-                                    <select class="form-control">
-                                        <option>Poca luce</option>
-                                        <option>Luce ottimale</option>
-                                        <option>Troppa luce</option>
-                                    </select>
-                                </div>
-                            </div>   
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Etichetta</label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="etichettaPiana" value="si" checked="">Piana
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="etichettaPiana" value="no">Non piana
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Caratteri </label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="caratteriDanneggiati" value="si" checked="">Opachi/Danneggiati
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="caratteriDanneggiati" value="no">Nitidi
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Immagine </label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="immagineNitida" value="si" checked="">Nitida
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="immagineNitida" value="no">Sfuocata
-                                        </label>
-                                    </div>
-                                </div>
-                            </div> 
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Mossa</label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="mossa" value="si" checked="">Foto mossa
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="mossa" value="no">Foto non mossa
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>   
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Risoluzione della foto</label>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="risoluzione" value="si" checked="">Alta risoluzione
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="risoluzione" value="no">Bassa risoluzione
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                                <label>Ingredienti</label>
-                                <textarea class="form-control" name="ingredienti" rows="3" placeholder="Per unificare gli stili dividere gli ingredienti con una virgola"></textarea>
-                            </div>
+                        <br>
                         <button type="submit" class="btn btn-primary btn-lg btn-block">Invia</button>
                     </form> 
                 </div>
