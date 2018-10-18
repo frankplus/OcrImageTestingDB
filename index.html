@@ -151,15 +151,15 @@
                             </div>    
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Risoluzione</label>
+                                    <label>Testo</label>
                                     <div class="radio">
                                         <label>
-                                            <input type="radio" name="risoluzione" value="si" checked="">Alta risoluzione
+                                            <input type="radio" name="testoPresente" value="si" checked="">Presente
                                         </label>
                                     </div>
                                     <div class="radio">
                                         <label>
-                                            <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                            <input type="radio" name="testoPresente" value="no">Non presente
                                         </label>
                                     </div>
                                 </div>
@@ -176,6 +176,53 @@
                                         <option>Troppa luce</option>
                                     </select>
                                 </div>
+                            </div>   
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Etichetta</label>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="etichettaPiana" value="si" checked="">Piana
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="etichettaPiana" value="no">Non piana
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Caratteri </label>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="caratteriDanneggiati" value="si" checked="">Opachi/Danneggiati
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="caratteriDanneggiati" value="no">Nitidi
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Immagine </label>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="immagineNitida" value="si" checked="">Nitida
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="immagineNitida" value="no">Sfuocata
+                                        </label>
+                                    </div>
+                                </div>
                             </div> 
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -191,9 +238,21 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>    
+                            </div>   
                             <div class="col-md-4">
-                                
+                                <div class="form-group">
+                                    <label>Risoluzione della foto</label>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="risoluzione" value="si" checked="">Alta risoluzione
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label>
+                                            <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
