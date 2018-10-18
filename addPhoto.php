@@ -12,7 +12,8 @@ if (!$mysqli)
 die("Can't connect to MySQL: ".mysqli_connect_error());
 //echo "Connected successfully\r\n";
 
-//get data via post
+//get data via post 
+//i seguenti dati sono di test - in seguito verranno reperiti via POST
 $photo_desc = "una gran bella foto";
 $photo_name = "photo";
 $photo_ingredients = "cacio, blallo, fiore";
@@ -22,7 +23,7 @@ $attr_array = array($attr1, $attr2);
 
 
 
-//get tags id
+//get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
 $tags_id_array = array();
 
 $sql = "SELECT * FROM tags";
@@ -37,17 +38,17 @@ if (mysqli_num_rows($result) > 0) {
         }
     }
 }
-print_r($tags_array);
 
 
 
-//get last id inserted
+//get last id inserted - ottendo l'ultimo id usato per identificare le foto, in modo da costruire poi il nome della foto
+//che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
 $sql = "SELECT MAX(photo_id) FROM photos";
 $result = mysqli_query($mysqli, $sql);
 $row = $result->fetch_assoc();
 $current_photo_id =  $row["MAX(photo_id)"] + 1;
 
-//load photo
+//load photo - DA COMPLETARE!!
 
 //TODO make the photo name like "photo"+current_photo_id
 if(isset($_FILES['photo'])){
@@ -76,7 +77,7 @@ if(isset($_FILES['photo'])){
       }
    }
 
-//insert photo attributes
+//insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
 $photo_name .= $current_photo_id;
 $photo_desc .= $current_photo_id;
 
@@ -84,6 +85,8 @@ $stmt = $mysqli -> prepare("INSERT INTO photos (photo_id, photo_desc, photo_ingr
 $stmt->bind_param("sss", $photo_desc, $photo_ingredients, $photo_name);
 $stmt -> execute();
 
+
+//inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
 foreach($tags_id_array as &$tag_id) {
   $stmt = $mysqli -> prepare("INSERT INTO jnc_photos_tags (photo_id_fk, tag_id_fk) VALUES(?, ?)");
   $stmt -> bind_param("ii", $current_photo_id, $tag_id);
