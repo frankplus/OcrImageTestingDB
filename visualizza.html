@@ -68,211 +68,434 @@
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
-            
+
             <div class="row">
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                    Dati raccolti
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Filtro di ricerca
+                    </div>
+                    <div class="panel-body">
+                        <form method="GET" action="#">
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Inclinazione</label>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="inclinazione" value="si">Inclinata
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="inclinazione" value="no">Non inclinata
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Angolazione</label>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="angolazione" value="si">Angolata
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="angolazione" value="no">Non angolata
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Risoluzione</label>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="risoluzione" value="si">Alta risoluzione
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Luce</label>
+                                        <select class="form-control">
+                                            <option>Nessun filtro</option>
+                                            <option>Poca luce</option>
+                                            <option>Luce ottimale</option>
+                                            <option>Troppa luce</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Mossa</label>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="mossa" value="si">Foto mossa
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="mossa" value="no">Foto non mossa
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label>Nome foto</label>
+                                <input class="form-control" name="nomeFoto" placeholder="Lasciare vuoto per non cercare in base al nome">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Cerca</button>
+                        </form>
+                    </div>
                 </div>
-                <div class="panel-body">
-                    <form method="GET" action="#">
-                        <div class="form-group">
-                            <label>Filtra tag:   </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="cercaTag[]" value="tag1">Tag 1
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="cercaTag[]" value="tag2">Tag 2
-                            </label>
-                            <label class="checkbox-inline">
-                                <input type="checkbox" name="cercaTag[]" value="tag3">Tag 3
-                            </label>
-                        </div>  
-                        <div class="form-group">
-                            <label>Nome foto</label>
-                            <input class="form-control" name="nomeFoto" placeholder="Lasciare vuoto per non cercare in base al nome">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Cerca</button>  
-                    </form>
 
-                    <br>
 
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 1
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
                             </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 2
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 3
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 4
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 5
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 1
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 2
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 3
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 4
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 5
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 1
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 2
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 3
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 4
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    Nome foto 5
-                                </div>
-                                <div class="panel-body">
-                                    <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg" style="width: 100%; height: auto;"></br></br>
-                                    <p>Tag: Sfuocata, Scusa, Illuminata....</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 col-md-offset-3">
-
-                                <ul class="pagination">
-                                    <li class="paginate_button previous disabled" aria-controls="dataTables-example" tabindex="0"><a href="#">Previous</a></li>
-                                    <li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="#">1</a></li>
-                                    <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li>
-                                    <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li>
-                                    <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li>
-                                    <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li>
-                                    <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li>
-                                    <li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a href="#">Next</a></li>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
                                 </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
 
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
 
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
                             </div>
                         </div>
                     </div>
-                    
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Nome foto 1
+                            </div>
+                            <div class="panel-body" style="font-size: 17px;">
+                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
+                                    style="width: 100%; height: auto;"></br></br>
+                                <b>Tag</b>:
+                                <ul>
+                                    <li>Sfuocata</li>
+                                    <li>Scura</li>
+                                    <li>Inclinata</li>
+                                </ul>
+                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
+                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 col-md-offset-3">
+
+                            <ul class="pagination">
+                                <li class="paginate_button previous disabled" aria-controls="dataTables-example"
+                                    tabindex="0"><a href="#">Previous</a></li>
+                                <li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a
+                                        href="#">1</a></li>
+                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li>
+                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li>
+                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li>
+                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li>
+                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li>
+                                <li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a
+                                        href="#">Next</a></li>
+                            </ul>
+
+
+                        </div>
+                    </div>
                 </div>
-                
+
             </div>
             <!-- /.row -->
         </div>
