@@ -1,7 +1,25 @@
+
 <?php
+/* IN LOGIN PAGE
+session_start();
+if(isset($_POST["password"])) {
+  if($_POST["password"] == "ingsoftware1819") {
+    $_SESSION['user'] = "ok";
+  }
+}
+
+/* IN PROTECTED PAGE
+session_start();
+
+if (!isset( $_SESSION['user'] ) ) {
+  header("Location: login.php");
+}
+*/
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 include 'database_info.php';
-//$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
 $mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
 // Check connection
 if ($mysqli->connect_error) {
@@ -18,15 +36,6 @@ function post($mysqli){
 
     $ingredienti = $_POST['ingredienti'];
 
-
-    //get data via post
-    //i seguenti dati sono di test - in seguito verranno reperiti via POST
-    $photo_desc = "una gran bella foto";
-    $photo_name = "photo";
-    $photo_ingredients = "cacio, blallo, fiore";
-    $attr1 = "illuminated";
-    $attr2 = "tilt";
-    $attr_array = array($attr1, $attr2);
     //get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
     $tags_id_array = array();
     $sql = "SELECT * FROM TAG";
@@ -44,26 +53,24 @@ function post($mysqli){
 
     //get last id inserted - ottendo l'ultimo id usato per identificare le foto, in modo da costruire poi il nome della foto
     //che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
-    $current_photo_id = 0;
 
+    $current_photo_id = 0;
     $sql = "SELECT MAX(ID) FROM FOTO";
     $result = mysqli_query($mysqli, $sql);
     if($result != NULL) {
       $row = $result->fetch_assoc();
-      $current_photo_id =  $row["MAX(ID)"] + 1;
+      $current_photo_id =  ((int)$row["MAX(ID)"] + 1);
     }
 
-    //load photo - DA COMPLETARE!!
-    //TODO make the photo name like "photo"+current_photo_id
 
     //echo var_dump($_FILES['immagine']) . "<br>";
+
     if(isset($_FILES['immagine'])){
         $errors= array();
 
         $file_name = "foto".$current_photo_id;
         $file_tmp =$_FILES['immagine']['tmp_name'];
-
-        //check if image
+        $file_size = $_FILES['immagine']['size'];
         $file_type=$_FILES['immagine']['type'];
         $file_ext=strtolower(end(explode('.',$_FILES['immagine']['name'])));
         $expensions= array("jpeg","jpg","png");
@@ -74,43 +81,43 @@ function post($mysqli){
             $errors[]='File size must be excately 5 MB';
         }
         if(empty($errors)==true){
-
-          //TODO uploading file to dir not working
-
-          echo var_dump(move_uploaded_file($_FILES['userfile']['tmp_name'], __DIR__."/foto/".$file_name));
+          move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name);
         }else{
             print_r($errors);
         }
     }
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
+    $photo_desc = "testing";
+    $photo_name = "foto";
     $photo_name .= $current_photo_id;
     $photo_desc .= $current_photo_id;
-    $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, DESCRIZIONE, INGREDIENTI) VALUES(NULL, ?, ?, ?)");
-    $stmt->bind_param("sss", $photo_desc, $photo_name, $photo_ingredients);
+    $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, DESCRIZIONE, INGREDIENTI) VALUES(?, ?, ?, ?)");
+    $stmt->bind_param("isss", $current_photo_id, $photo_desc, $photo_name, $ingredienti);
     $stmt -> execute();
 
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
     foreach($tags_id_array as &$tag_id) {
-    $stmt = $mysqli -> prepare("INSERT INTO FOTOTAG (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
-    $stmt -> bind_param("ii", $current_photo_id, $tag_id);
-    $stmt -> execute();
+      //senza chiavi esterne è necessario controllare non vi siano righe uguali
+      $stmt = $mysqli -> prepare("SELECT * FROM FOTOTAG WHERE IDFOTO = ? AND IDTAG = ?");
+      $stmt -> bind_param("ii", $current_photo_id, $tag_id);
+      $stmt -> execute();
+      $stmt->bind_result($id, $fotoid, $tagid);
+      $stmt->fetch();
+      $stmt->close();
+      //se non vi sono duplicati associo foto al tag
+      if($id == NULL) {
+        $stmt = $mysqli -> prepare("INSERT INTO FOTOTAG (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
+        $stmt -> bind_param("ii", $current_photo_id, $tag_id);
+        $stmt -> execute();
+      }
+
+
     }
 
-}
+    //close connection
+    mysqli_close($mysqli);
 
-//close connection
-mysqli_close($mysqli);
-//insert description and photo data with BLOB
-//credits https://blogs.oracle.com/oswald/phps-mysqli-extension:-storing-and-retrieving-blobs
-/*
-$stmt = $mysqli->prepare("INSERT INTO photos (photo_id, photo_desc, photo_data) VALUES(NULL, ?, ?)");
-$null = NULL;
-$stmt->bind_param("sb", $photo_desc, $null);
-//1 indicates which parameter to associate the data with
-$stmt->send_long_data(1, file_get_contents("test_photo.jpg"));
-$stmt->execute();
-$stmt->close();
-*/
+}
 ?>
 
 <!DOCTYPE html>
@@ -138,7 +145,7 @@ $stmt->close();
     <!-- Custom Fonts -->
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <script>
-        setTimeout("location.href = 'index.html';",5000);
+        //setTimeout("location.href = 'index.html';",5000);
     </script>
 </head>
 
