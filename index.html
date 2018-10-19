@@ -110,7 +110,7 @@
                 </div>
                 <div class="panel-body">
 
-                    <form action="inserimento.php" method="POST">
+                    <form action="inserimento.php" method="POST" enctype="multipart/form-data">
 
                         <div class="form-group">
                             <label>Immagine: </label>
@@ -143,12 +143,12 @@
                                             <label>Inclinazione</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="inclinazione" value="si" checked="">Inclinata
+                                                    <input type="radio" name="inclinazione" value="inclinata" checked="">Inclinata
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="inclinazione" value="no">Non inclinata
+                                                    <input type="radio" name="inclinazione" value="non_inclinata">Non inclinata
                                                 </label>
                                             </div>
                                         </div>
@@ -158,12 +158,12 @@
                                             <label>Angolazione</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="angolazione" value="si" checked="">Angolata
+                                                    <input type="radio" name="angolazione" value="angolata" checked="">Angolata
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="angolazione" value="no">Non angolata
+                                                    <input type="radio" name="angolazione" value="non_angolata">Non angolata
                                                 </label>
                                             </div>
                                         </div>
@@ -173,12 +173,12 @@
                                             <label>Testo</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="testoPresente" value="si" checked="">Presente
+                                                    <input type="radio" name="testoPresente" value="testo_presente" checked="">Presente
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="testoPresente" value="no">Non presente
+                                                    <input type="radio" name="testoPresente" value="testo_non_presente">Non presente
                                                 </label>
                                             </div>
                                         </div>
@@ -189,10 +189,10 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Luce</label>
-                                            <select class="form-control">
-                                                <option>Poca luce</option>
-                                                <option>Luce ottimale</option>
-                                                <option>Troppa luce</option>
+                                            <select name = "luce" class="form-control">
+                                                <option value="poca_luce">Poca luce</option>
+                                                <option value="luce_ottimale">Luce ottimale</option>
+                                                <option value="troppa_luce">Troppa luce</option>
                                             </select>
                                         </div>
                                     </div>
@@ -201,12 +201,12 @@
                                             <label>Etichetta</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="etichettaPiana" value="si" checked="">Piana
+                                                    <input type="radio" name="etichettaPiana" value="etichetta_piana" checked="">Piana
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="etichettaPiana" value="no">Non piana
+                                                    <input type="radio" name="etichettaPiana" value="etichetta_non_piana">Non piana
                                                 </label>
                                             </div>
                                         </div>
@@ -216,12 +216,12 @@
                                             <label>Caratteri </label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="caratteriDanneggiati" value="si" checked="">Opachi/Danneggiati
+                                                    <input type="radio" name="caratteriDanneggiati" value="caratteri_danneggiati" checked="">Opachi/Danneggiati
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="caratteriDanneggiati" value="no">Nitidi
+                                                    <input type="radio" name="caratteriDanneggiati" value="caratteri_non_danneggiati">Nitidi
                                                 </label>
                                             </div>
                                         </div>
@@ -233,12 +233,12 @@
                                             <label>Immagine </label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="immagineNitida" value="si" checked="">Nitida
+                                                    <input type="radio" name="immagineNitida" value="nitida" checked="">Nitida
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="immagineNitida" value="no">Sfuocata
+                                                    <input type="radio" name="immagineNitida" value="sfuocata">Sfuocata
                                                 </label>
                                             </div>
                                         </div>
@@ -248,12 +248,12 @@
                                             <label>Mossa</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="mossa" value="si" checked="">Foto mossa
+                                                    <input type="radio" name="mossa" value="foto_mossa" checked="">Foto mossa
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="mossa" value="no">Foto non mossa
+                                                    <input type="radio" name="mossa" value="foto_non_mossa">Foto non mossa
                                                 </label>
                                             </div>
                                         </div>
@@ -263,12 +263,12 @@
                                             <label>Risoluzione della foto</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="risoluzione" value="si" checked="">Alta risoluzione
+                                                    <input type="radio" name="risoluzione" value="alta_risoluzione" checked="">Alta risoluzione
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                                    <input type="radio" name="risoluzione" value="bassa_risoluzione">Bassa risoluzione
                                                 </label>
                                             </div>
                                         </div>
