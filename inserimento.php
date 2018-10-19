@@ -20,6 +20,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include 'database_info.php';
+//$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
 $mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
 // Check connection
 if ($mysqli->connect_error) {
@@ -29,10 +30,15 @@ if ($mysqli->connect_error) {
 function post($mysqli){
     $inclinazione = $_POST['inclinazione'];
     $angolazione = $_POST['angolazione'];
-    $risoluzione = $_POST['inclinazione'];
+    $testoPresente = $_POST['testoPresente'];
     $luce = $_POST['luce'];
+    $etichettaPiana = $_POST['etichettaPiana'];
+    $caratteriDanneggiati = $_POST['caratteriDanneggiati'];
+    $immagineNitida = $_POST['immagineNitida'];
+    $mossa = $_POST['mossa'];
+    $risoluzione= $_POST['risoluzione'];
 
-    $attr_array = array($inclinazione, $angolazione, $risoluzione, $luce);
+    $attr_array = array($inclinazione, $angolazione, $risoluzione, $testoPresente, $luce, $etichettaPiana, $caratteriDanneggiati, $immagineNitida, $mossa, $risoluzione);
 
     $ingredienti = $_POST['ingredienti'];
 
@@ -62,6 +68,8 @@ function post($mysqli){
       $current_photo_id =  ((int)$row["MAX(ID)"] + 1);
     }
 
+    //load photo - DA COMPLETARE!!
+    //TODO make the photo name like "photo"+current_photo_id
 
     //echo var_dump($_FILES['immagine']) . "<br>";
 
@@ -71,6 +79,7 @@ function post($mysqli){
         $file_name = "foto".$current_photo_id;
         $file_tmp =$_FILES['immagine']['tmp_name'];
         $file_size = $_FILES['immagine']['size'];
+        //check if image
         $file_type=$_FILES['immagine']['type'];
         $file_ext=strtolower(end(explode('.',$_FILES['immagine']['name'])));
         $expensions= array("jpeg","jpg","png");
@@ -81,18 +90,19 @@ function post($mysqli){
             $errors[]='File size must be excately 5 MB';
         }
         if(empty($errors)==true){
+
+          //TODO uploading file to dir not working
+
           move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name);
         }else{
             print_r($errors);
         }
     }
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
-    $photo_desc = "testing";
     $photo_name = "foto";
     $photo_name .= $current_photo_id;
-    $photo_desc .= $current_photo_id;
-    $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, DESCRIZIONE, INGREDIENTI) VALUES(?, ?, ?, ?)");
-    $stmt->bind_param("isss", $current_photo_id, $photo_desc, $photo_name, $ingredienti);
+    $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
+    $stmt->bind_param("iss", $current_photo_id, $photo_name, $ingredienti);
     $stmt -> execute();
 
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
@@ -118,6 +128,19 @@ function post($mysqli){
     mysqli_close($mysqli);
 
 }
+
+
+//insert description and photo data with BLOB
+//credits https://blogs.oracle.com/oswald/phps-mysqli-extension:-storing-and-retrieving-blobs
+/*
+$stmt = $mysqli->prepare("INSERT INTO photos (photo_id, photo_desc, photo_data) VALUES(NULL, ?, ?)");
+$null = NULL;
+$stmt->bind_param("sb", $photo_desc, $null);
+//1 indicates which parameter to associate the data with
+$stmt->send_long_data(1, file_get_contents("test_photo.jpg"));
+$stmt->execute();
+$stmt->close();
+*/
 ?>
 
 <!DOCTYPE html>
