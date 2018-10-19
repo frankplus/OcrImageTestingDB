@@ -227,6 +227,9 @@ $stmt->close();
                             <a href="visualizza.php"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
                         </li>
                         <li>
+                            <a href="download.php"><i class="fa fa-key fa-fw"></i> Download dati</a>
+                        </li>
+                        <li>
                             <a href="logout.php"><i class="fa fa-key fa-fw"></i> Logout</a>
                         </li>
                     </ul>
