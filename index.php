@@ -15,7 +15,9 @@ if (!isset( $_SESSION['user'] ) ) {
 }
 */
 
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 include 'database_info.php';
@@ -26,9 +28,7 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
@@ -37,14 +37,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     } catch (Exception $e) {
         header("location: /index.php?errore&tipo:$e->getMessage()");
     }
-    
+
 }
 
 function printNumFoto($mysqli)
 {
-    $sql = "SELECT * FROM foto";
+    $sql = "SELECT COUNT(*) FROM FOTO";
     $result = mysqli_query($mysqli, $sql);
-    echo mysqli_num_rows($result);
+    $rows = mysqli_fetch_row($result);
+    echo $rows[0];
 }
 
 //echo "Connected successfully";
@@ -117,7 +118,7 @@ function post($mysqli){
         if(empty($errors)==true){
           //TODO uploading file to dir not working
           move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name.".".$file_ext);
-          
+
         }else{
             throw new Exception();
         }
@@ -129,6 +130,21 @@ function post($mysqli){
     $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
     $stmt->bind_param("iss", $current_photo_id, $photo_name, $ingredienti);
     $stmt -> execute();
+
+    //aggiunta filte .txt descrittivo
+    //setto testo descrizione in formato JSON
+    /*
+    {
+      "ingredients": ["ing1,", "ing2"],
+      "tags": ["tag1", "tag2"]
+    }
+    */
+    $ingredient_array = explode(",", $ingredienti);
+    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array));
+    $description_path = "foto/foto" . $current_photo_id . ".txt";
+    $description_file = fopen("foto/foto".$current_photo_id.".txt", "w");
+    fwrite($description_file, $description_json);
+    fclose($description_file);
 
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
     foreach($tags_id_array as &$tag_id) {
@@ -470,8 +486,8 @@ $stmt->close();
 
             </div>
 
-            
-            
+
+
             <!-- /.row -->
         </div>
         <!-- /#page-wrapper -->
