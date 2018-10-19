@@ -1,3 +1,172 @@
+<?php
+/* IN LOGIN PAGE
+session_start();
+if(isset($_POST["password"])) {
+  if($_POST["password"] == "ingsoftware1819") {
+    $_SESSION['user'] = "ok";
+  }
+}
+
+/* IN PROTECTED PAGE
+session_start();
+
+if (!isset( $_SESSION['user'] ) ) {
+  header("Location: login.php");
+}
+*/
+
+
+
+
+include 'database_info.php';
+//$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
+$mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
+// Check connection
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+if($_SERVER["REQUEST_METHOD"] == "POST") {
+    try {
+        post($mysqli);
+        header("location: /index.php?inserita");
+    } catch (Exception $e) {
+        header("location: /index.php?errore&tipo:$e->getMessage()");
+    }
+    
+}
+
+function printNumFoto($mysqli)
+{
+    $sql = "SELECT * FROM foto";
+    $result = mysqli_query($mysqli, $sql);
+    echo mysqli_num_rows($result);
+}
+
+//echo "Connected successfully";
+function post($mysqli){
+    $inclinazione = $_POST['inclinazione'];
+    $angolazione = $_POST['angolazione'];
+    $testoPresente = $_POST['testoPresente'];
+    $luce = $_POST['luce'];
+    $etichettaPiana = $_POST['etichettaPiana'];
+    $caratteriDanneggiati = $_POST['caratteriDanneggiati'];
+    $immagineNitida = $_POST['immagineNitida'];
+    $mossa = $_POST['mossa'];
+    $risoluzione= $_POST['risoluzione'];
+
+    $attr_array = array($inclinazione, $angolazione, $risoluzione, $testoPresente, $luce, $etichettaPiana, $caratteriDanneggiati, $immagineNitida, $mossa, $risoluzione);
+
+    $ingredienti = $_POST['ingredienti'];
+
+    //get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
+    $tags_id_array = array();
+    $sql = "SELECT * FROM TAG";
+    $result = mysqli_query($mysqli, $sql);
+    if (mysqli_num_rows($result) > 0) {
+        // output data of each row
+        while($row = mysqli_fetch_assoc($result)) {
+            foreach($attr_array as &$value) {
+              if($value == $row["NOME"]) {
+                  array_push($tags_id_array, (int)$row["ID"]);
+              }
+            }
+        }
+    }
+
+    //get last id inserted - ottendo l'ultimo id usato per identificare le foto, in modo da costruire poi il nome della foto
+    //che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
+
+    $current_photo_id = 0;
+    $sql = "SELECT MAX(ID) FROM FOTO";
+    $result = mysqli_query($mysqli, $sql);
+    if($result != NULL) {
+      $row = $result->fetch_assoc();
+      $current_photo_id =  ((int)$row["MAX(ID)"] + 1);
+    }
+
+    //load photo - DA COMPLETARE!!
+    //TODO make the photo name like "photo"+current_photo_id
+
+    //echo var_dump($_FILES['immagine']) . "<br>";
+    $file_ext="";
+    if(isset($_FILES['immagine'])){
+        $errors= array();
+
+        $file_name = "foto".$current_photo_id;
+        $file_tmp =$_FILES['immagine']['tmp_name'];
+        $file_size = $_FILES['immagine']['size'];
+        //check if image
+        $file_type=$_FILES['immagine']['type'];
+
+        //$file_ext=strtolower(end(explode('.',$_FILES['immagine']['name'])));
+
+        $path = $_FILES['immagine']['name'];
+        $file_ext = pathinfo($path, PATHINFO_EXTENSION);
+        $expensions= array("jpeg","jpg","png");
+        if(in_array($file_ext,$expensions)=== false){
+            $errors[]="extension not allowed, please choose a JPEG or PNG file.";
+        }
+        if($file_size > 5242880){
+            $errors[]='File size must be under 5 MB';
+        }
+        if(empty($errors)==true){
+          //TODO uploading file to dir not working
+          move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name.".".$file_ext);
+          
+        }else{
+            throw new Exception();
+        }
+    }
+    //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
+    $photo_name = "foto";
+    $photo_name .= $current_photo_id;
+    $photo_name .= ".".$file_ext;
+    $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
+    $stmt->bind_param("iss", $current_photo_id, $photo_name, $ingredienti);
+    $stmt -> execute();
+
+    //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
+    foreach($tags_id_array as &$tag_id) {
+      //senza chiavi esterne è necessario controllare non vi siano righe uguali
+      $stmt = $mysqli -> prepare("SELECT * FROM FOTOTAG WHERE IDFOTO = ? AND IDTAG = ?");
+      $stmt -> bind_param("ii", $current_photo_id, $tag_id);
+      $stmt -> execute();
+      $stmt->bind_result($id, $fotoid, $tagid);
+      $stmt->fetch();
+      $stmt->close();
+      //se non vi sono duplicati associo foto al tag
+      if($id == NULL) {
+        $stmt = $mysqli -> prepare("INSERT INTO FOTOTAG (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
+        $stmt -> bind_param("ii", $current_photo_id, $tag_id);
+        $stmt -> execute();
+      }
+
+
+    }
+
+    //close connection
+    mysqli_close($mysqli);
+
+}
+
+
+//insert description and photo data with BLOB
+//credits https://blogs.oracle.com/oswald/phps-mysqli-extension:-storing-and-retrieving-blobs
+/*
+$stmt = $mysqli->prepare("INSERT INTO photos (photo_id, photo_desc, photo_data) VALUES(NULL, ?, ?)");
+$null = NULL;
+$stmt->bind_param("sb", $photo_desc, $null);
+//1 indicates which parameter to associate the data with
+$stmt->send_long_data(1, file_get_contents("test_photo.jpg"));
+$stmt->execute();
+$stmt->close();
+*/
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,7 +207,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.html">Gestione foto - Elementi di Ingegneria</a>
+                <a class="navbar-brand" href="index.php">Gestione foto - Elementi di Ingegneria</a>
             </div>
             <!-- /.navbar-header -->
 
@@ -46,7 +215,7 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="index.html"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
+                            <a href="index.php"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
                         </li>
                         <li>
                             <a href="visualizza.html"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
@@ -78,7 +247,7 @@
                                     <i class="fa fa-photo fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge">26</div>
+                                    <div class="huge"><?php echo printNumFoto($mysqli); ?></div>
                                     <div>Foto inserite</div>
                                 </div>
                             </div>
@@ -104,34 +273,48 @@
             </div>
             <!-- /.row -->
             <div class="row">
+            <?php
+                if(isset($_GET["inserita"]))
+                {
+                    echo '<div class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            Foto caricata.
+                        </div>';
+                }
+                if(isset($_GET["errore"]))
+                {
+                    echo '<div class="alert alert-danger alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            Errore. Assicurati che sia .jpg o .png e minore di 5MB
+                        </div>';
+                }
+            ?>
               <div class="panel panel-default">
                 <div class="panel-heading">
                       Inserimento valori
                 </div>
                 <div class="panel-body">
 
-                    <form action="inserimento.php" method="POST">
+                    <form action="#" method="POST" enctype="multipart/form-data">
 
                         <div class="form-group">
                             <label>Immagine: </label>
                             <input type="file" name="immagine" accept="image/gif, image/jpeg, image/png" onchange="readURL(this);"><br>
-                            
+
                         </div>
                         <script>
                             function readURL(input) {
                                 if (input.files && input.files[0]) {
                                     var reader = new FileReader();
-
                                     reader.onload = function (e) {
                                         $('#imgPreview')
                                             .attr('src', e.target.result)
                                     };
-
                                     reader.readAsDataURL(input.files[0]);
                                 }
                             }
                         </script>
-                        
+
                         <div class="row">
                             <div class="col-md-4">
                                 <img id="imgPreview" class="img-responsive" src="defaultIMG.jpg" style="height:auto; max-width:100%" />
@@ -143,12 +326,12 @@
                                             <label>Inclinazione</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="inclinazione" value="si" checked="">Inclinata
+                                                    <input type="radio" name="inclinazione" value="inclinata" >Inclinata
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="inclinazione" value="no">Non inclinata
+                                                    <input type="radio" name="inclinazione" value="non_inclinata" checked="">Non inclinata
                                                 </label>
                                             </div>
                                         </div>
@@ -158,12 +341,12 @@
                                             <label>Angolazione</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="angolazione" value="si" checked="">Angolata
+                                                    <input type="radio" name="angolazione" value="angolata">Angolata
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="angolazione" value="no">Non angolata
+                                                    <input type="radio" name="angolazione" value="non_angolata" checked="">Non angolata
                                                 </label>
                                             </div>
                                         </div>
@@ -173,26 +356,26 @@
                                             <label>Testo</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="testoPresente" value="si" checked="">Presente
+                                                    <input type="radio" name="testoPresente" value="testo_presente" checked="">Presente
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="testoPresente" value="no">Non presente
+                                                    <input type="radio" name="testoPresente" value="testo_non_presente">Non presente
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                        
+
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Luce</label>
-                                            <select class="form-control">
-                                                <option>Poca luce</option>
-                                                <option>Luce ottimale</option>
-                                                <option>Troppa luce</option>
+                                            <select name = "luce" class="form-control">
+                                                <option value="poca_luce">Poca luce</option>
+                                                <option value="luce_ottimale">Luce ottimale</option>
+                                                <option value="troppa_luce">Troppa luce</option>
                                             </select>
                                         </div>
                                     </div>
@@ -201,12 +384,12 @@
                                             <label>Etichetta</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="etichettaPiana" value="si" checked="">Piana
+                                                    <input type="radio" name="etichettaPiana" value="etichetta_piana" checked="">Piana
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="etichettaPiana" value="no">Non piana
+                                                    <input type="radio" name="etichettaPiana" value="etichetta_non_piana">Non piana
                                                 </label>
                                             </div>
                                         </div>
@@ -216,12 +399,12 @@
                                             <label>Caratteri </label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="caratteriDanneggiati" value="si" checked="">Opachi/Danneggiati
+                                                    <input type="radio" name="caratteriDanneggiati" value="caratteri_danneggiati">Opachi/Danneggiati
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="caratteriDanneggiati" value="no">Nitidi
+                                                    <input type="radio" name="caratteriDanneggiati" value="caratteri_non_danneggiati" checked="">Nitidi
                                                 </label>
                                             </div>
                                         </div>
@@ -233,12 +416,12 @@
                                             <label>Immagine </label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="immagineNitida" value="si" checked="">Nitida
+                                                    <input type="radio" name="immagineNitida" value="nitida" checked="">Nitida
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="immagineNitida" value="no">Sfuocata
+                                                    <input type="radio" name="immagineNitida" value="sfuocata">Sfuocata
                                                 </label>
                                             </div>
                                         </div>
@@ -248,12 +431,12 @@
                                             <label>Mossa</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="mossa" value="si" checked="">Foto mossa
+                                                    <input type="radio" name="mossa" value="foto_mossa">Foto mossa
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="mossa" value="no">Foto non mossa
+                                                    <input type="radio" name="mossa" value="foto_non_mossa" checked="">Foto non mossa
                                                 </label>
                                             </div>
                                         </div>
@@ -263,12 +446,12 @@
                                             <label>Risoluzione della foto</label>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="risoluzione" value="si" checked="">Alta risoluzione
+                                                    <input type="radio" name="risoluzione" value="alta_risoluzione" checked="">Alta risoluzione
                                                 </label>
                                             </div>
                                             <div class="radio">
                                                 <label>
-                                                    <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                                    <input type="radio" name="risoluzione" value="bassa_risoluzione">Bassa risoluzione
                                                 </label>
                                             </div>
                                         </div>
@@ -282,20 +465,13 @@
                         </div>
                         <br>
                         <button type="submit" class="btn btn-primary btn-lg btn-block">Invia</button>
-                    </form> 
+                    </form>
                 </div>
-                
+
             </div>
 
-            <div class="alert alert-success alert-dismissable">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                Foto caricata.
-            </div>
-
-            <div class="alert alert-danger alert-dismissable">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                Errore.
-            </div>
+            
+            
             <!-- /.row -->
         </div>
         <!-- /#page-wrapper -->
