@@ -1,4 +1,9 @@
 <?php
+    session_start();
+    if (!isset( $_SESSION['user'] ) ) {
+    header("location: /index.php");
+    }
+
     include 'database_info.php';
     function get(){
         
@@ -15,6 +20,7 @@
         mysqli_close($mysqli);
     }
 
+    //questa funzione seleziona le foto dal database e le inserisce in un'array pronto per essere visualizzato
     function generaListaFoto($mysqli){
         /*
             creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
@@ -70,11 +76,8 @@
         } else array_push($tags_array, "alta_risoluzione", "bassa_risoluzione");
 
         $tags = "'".implode("','", $tags_array)."'";
-        
-        //$idtagssql = "SELECT ID FROM tag WHERE NOME IN ('$tags')";
-        //$idfotosql = 'SELECT IDFOTO FROM fototag WHERE IDTAG IN ($idtagssql) GROUP BY IDFOTO HAVING COUNT(IDFOTO) = {count($tags_array)}';
-        //$fotosql = 'SELECT * FROM foto WHERE ID IN ($idfotosql)';
 
+        //creazione della query
         $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
         INNER JOIN fototag ON foto.ID = fototag.IDFOTO
         WHERE IDTAG IN (
@@ -84,13 +87,14 @@
         )
         GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
         ";
-        //var_dump($selectfotosql);
+
         $result = mysqli_query($mysqli, $selectfotosql);
         $fotolist = mysqli_fetch_all($result,MYSQLI_ASSOC);
         mysqli_free_result($result);
         return $fotolist;
     }
 
+    //selezione dei tag corrispondenti ad una foto
     function generateTagList($mysqli, $idfoto){
         $sql = "SELECT tag.NOME FROM tag
                 INNER JOIN fototag ON tag.ID = fototag.IDTAG
@@ -101,6 +105,7 @@
         return $taglist;
     }
 
+    //generazione del codice html con la lista di tag
     function printTagList($taglist){
         $htmltaglist = '';
         foreach($taglist as $tag){
@@ -109,10 +114,12 @@
         return $htmltaglist;
     }
 
+    //generazione dell'url dove reperire i file delle foto
     function generateUrl($nomefile){
         return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
     }
 
+    //stampa in html della lista delle foto selezionate e delle corrispondenti tag
     function stampaListaFoto($mysqli, $fotolist){
         echo'<div class="row">';
         $i=0;
@@ -194,10 +201,13 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="index.php"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
+                            <a href="inserimento.php"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
                         </li>
                         <li>
                             <a href="visualizza.php"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
+                        </li>
+                        <li>
+                            <a href="download.php"><i class="fa fa-download fa-fw"></i> Download dati</a>
                         </li>
                         <li>
                             <a href="logout.php"><i class="fa fa-key fa-fw"></i> Logout</a>
@@ -377,33 +387,33 @@
 
 
                 
-                    <!-- visualizzazione delle foto -->
+                <!-- visualizzazione delle foto -->
                 <?php
                 if($_SERVER["REQUEST_METHOD"] == "GET") {
                     get();
                 }
                 ?>
 
-                    <div class="row">
-                        <div class="col-md-6 col-md-offset-3">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3">
 
-                            <ul class="pagination">
-                                <li class="paginate_button previous disabled" aria-controls="dataTables-example"
-                                    tabindex="0"><a href="#">Previous</a></li>
-                                <li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a
-                                        href="#">1</a></li>
-                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li>
-                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li>
-                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li>
-                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li>
-                                <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li>
-                                <li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a
-                                        href="#">Next</a></li>
-                            </ul>
+                        <ul class="pagination">
+                            <li class="paginate_button previous disabled" aria-controls="dataTables-example"
+                                tabindex="0"><a href="#">Previous</a></li>
+                            <li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a
+                                    href="#">1</a></li>
+                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li>
+                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li>
+                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li>
+                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li>
+                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li>
+                            <li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a
+                                    href="#">Next</a></li>
+                        </ul>
 
 
-                        </div>
                     </div>
+                </div>
                 
 
             </div>
