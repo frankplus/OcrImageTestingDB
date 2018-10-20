@@ -287,7 +287,7 @@ function post($mysqli){
                 {
                     echo '<div class="alert alert-danger alert-dismissable">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                            Errore. Assicurati che sia .jpg o .png e minore di 5MB
+                            Errore. Assicurati che sia .jpg o .png e minore di 5MB. Assicurati inoltre di aver inserito gli ingredienti.
                         </div>';
                 }
             ?>
