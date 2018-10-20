@@ -34,6 +34,7 @@
             if($_GET['luce'] == 'poca') array_push($tags_array, "poca_luce");
             else if($_GET['luce'] == 'ottimale') array_push($tags_array, "luce_ottimale");
             else if($_GET['luce'] == 'troppa') array_push($tags_array, "troppa_luce");
+            else array_push($tags_array, "poca_luce", "luce_ottimale", "troppa_luce");
         } else array_push($tags_array, "poca_luce", "luce_ottimale", "troppa_luce");
 
         if(isset($_GET['etichettaPiana'])){
@@ -62,7 +63,7 @@
         } else array_push($tags_array, "alta_risoluzione", "bassa_risoluzione");
 
         $tags = "'".implode("','", $tags_array)."'";
-
+        
         //$idtagssql = "SELECT ID FROM tag WHERE NOME IN ('$tags')";
         //$idfotosql = 'SELECT IDFOTO FROM fototag WHERE IDTAG IN ($idtagssql) GROUP BY IDFOTO HAVING COUNT(IDFOTO) = {count($tags_array)}';
         //$fotosql = 'SELECT * FROM foto WHERE ID IN ($idfotosql)';
@@ -76,7 +77,6 @@
         )
         GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
         ";
-
         //var_dump($selectfotosql);
         $result = mysqli_query($mysqli, $selectfotosql);
         $fotolist = mysqli_fetch_all($result,MYSQLI_ASSOC);
@@ -259,7 +259,7 @@
                                     <div class="form-group">
                                         <label>Luce</label>
                                         <select name="luce" class="form-control">
-                                            <option value="poca">Nessuna scelta</option>
+                                            <option value="nessuna">Nessuna scelta</option>
                                             <option value="poca">Poca luce</option>
                                             <option value="ottimale">Luce ottimale</option>
                                             <option value="troppa">Troppa luce</option>
