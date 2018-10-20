@@ -58,7 +58,7 @@ if (!isset( $_SESSION['user'] ) ) {
                             <a href="visualizza.php"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
                         </li>
                         <li>
-                            <a href="download.php"><i class="fa fa-key fa-fw"></i> Download dati</a>
+                            <a href="download.php"><i class="fa fa-download fa-fw"></i> Download dati</a>
                         </li>
                         <li>
                             <a href="logout.php"><i class="fa fa-key fa-fw"></i> Logout</a>
@@ -89,7 +89,7 @@ if (!isset( $_SESSION['user'] ) ) {
                                 
                                     $zip = new ZipArchive;
                                     $download = 'tmp/fotoDb.zip';
-                                    $zip->open($download, ZipArchive::CREATE);
+                                    $zip->open($download, (ZipArchive::CREATE | ZipArchive::OVERWRITE));
                                     foreach (glob("foto/*") as $file) {
                                         $zip->addFile($file);
                                     }
