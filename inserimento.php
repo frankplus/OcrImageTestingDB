@@ -12,7 +12,7 @@ if (!isset( $_SESSION['user'] ) ) {
 
 include 'database_info.php';
 //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
-$mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
+$mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
 // Check connection
 if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -62,7 +62,7 @@ function post($mysqli){
 
     //get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
     $tags_id_array = array();
-    $sql = "SELECT * FROM TAG";
+    $sql = "SELECT * FROM tag";
     $result = mysqli_query($mysqli, $sql);
     if (mysqli_num_rows($result) > 0) {
         // output data of each row
@@ -79,7 +79,7 @@ function post($mysqli){
     //che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
 
     $current_photo_id = 0;
-    $sql = "SELECT MAX(ID) FROM FOTO";
+    $sql = "SELECT MAX(ID) FROM foto";
     $result = mysqli_query($mysqli, $sql);
     if($result != NULL) {
       $row = $result->fetch_assoc();
@@ -118,7 +118,7 @@ function post($mysqli){
     $photo_name = "foto";
     $photo_name .= $current_photo_id;
     $photo_name .= ".".$file_ext;
-    $stmt = $mysqli -> prepare("INSERT INTO FOTO (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
+    $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
     $stmt->bind_param("iss", $current_photo_id, $photo_name, $ingredienti);
     $stmt -> execute();
 
@@ -142,7 +142,7 @@ function post($mysqli){
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
     foreach($tags_id_array as &$tag_id) {
       //senza chiavi esterne è necessario controllare non vi siano righe uguali
-      $stmt = $mysqli -> prepare("SELECT * FROM FOTOTAG WHERE IDFOTO = ? AND IDTAG = ?");
+      $stmt = $mysqli -> prepare("SELECT * FROM fototag WHERE IDFOTO = ? AND IDTAG = ?");
       $stmt -> bind_param("ii", $current_photo_id, $tag_id);
       $stmt -> execute();
       $stmt->bind_result($id, $fotoid, $tagid);
@@ -150,7 +150,7 @@ function post($mysqli){
       $stmt->close();
       //se non vi sono duplicati associo foto al tag
       if($id == NULL) {
-        $stmt = $mysqli -> prepare("INSERT INTO FOTOTAG (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
+        $stmt = $mysqli -> prepare("INSERT INTO fototag (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
         $stmt -> bind_param("ii", $current_photo_id, $tag_id);
         $stmt -> execute();
       }
