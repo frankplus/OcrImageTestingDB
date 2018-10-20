@@ -207,7 +207,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.html">Gestione foto - Elementi di Ingegneria</a>
+                <a class="navbar-brand" href="inserimento.php">Gestione foto - Elementi di Ingegneria</a>
             </div>
             <!-- /.navbar-header -->
 
