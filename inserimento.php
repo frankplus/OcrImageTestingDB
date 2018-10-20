@@ -32,7 +32,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 function printNumFoto($mysqli)
 {
-    $sql = "SELECT COUNT(*) FROM FOTO";
+    $sql = "SELECT COUNT(*) FROM foto";
     $result = mysqli_query($mysqli, $sql);
     $rows = mysqli_fetch_row($result);
     echo $rows[0];
@@ -466,8 +466,35 @@ function post($mysqli){
                             </div>
                         </div>
                         <br>
-                        <button type="submit" class="btn btn-primary btn-lg btn-block">Invia</button>
-                    </form>
+                        
+                        
+                        
+                        
+                            
+                            
+                            <button type="dd" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#myModal" onclick='upload_image();'>Invia</button>
+                            <!-- Button trigger modal -->
+                            
+                            
+                            <!-- Modal -->
+                            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                            <h4 class="modal-title" id="myModalLabel">CARICAMENTO</h4>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            <img src="caricamento.gif">
+                                        </div>
+                                    </div>
+                                    <!-- /.modal-content -->
+                                </div>
+                                <!-- /.modal-dialog -->
+                            </div>
+
+                            
+                        </form>
                 </div>
 
             </div>
