@@ -259,6 +259,7 @@
                                     <div class="form-group">
                                         <label>Luce</label>
                                         <select name="luce" class="form-control">
+                                            <option value="poca">Nessuna scelta</option>
                                             <option value="poca">Poca luce</option>
                                             <option value="ottimale">Luce ottimale</option>
                                             <option value="troppa">Troppa luce</option>
