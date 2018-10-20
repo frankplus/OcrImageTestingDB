@@ -22,7 +22,7 @@ error_reporting(E_ALL);
 
 include 'database_info.php';
 //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
-$mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
+$mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
 // Check connection
 if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);

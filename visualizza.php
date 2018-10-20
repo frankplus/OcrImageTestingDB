@@ -1,17 +1,14 @@
 <?php
-    if($_SERVER["REQUEST_METHOD"] == "GET") {
-        include 'database_info.php';
+    include 'database_info.php';
+    function get(){
+        
         //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
-        $mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
+        $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
         // Check connection
         if ($mysqli->connect_error) {
             die("Connection failed: " . $conn->connect_error);
         }
-        
-        get($mysqli);
-    }
 
-    function get($mysqli){
         /*
             creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
             i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
@@ -70,7 +67,7 @@
         //$idfotosql = 'SELECT IDFOTO FROM fototag WHERE IDTAG IN ($idtagssql) GROUP BY IDFOTO HAVING COUNT(IDFOTO) = {count($tags_array)}';
         //$fotosql = 'SELECT * FROM foto WHERE ID IN ($idfotosql)';
 
-        $selectfotosql = "SELECT * FROM foto
+        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
         INNER JOIN fototag ON foto.ID = fototag.IDFOTO
         WHERE IDTAG IN (
             SELECT ID 
@@ -82,11 +79,47 @@
 
         //var_dump($selectfotosql);
         $result = mysqli_query($mysqli, $selectfotosql);
-        if (mysqli_num_rows($result) > 0) {
-            while($row = mysqli_fetch_assoc($result)) {
-                var_dump($row);
+        $fotolist = mysqli_fetch_all($result,MYSQLI_ASSOC);
+        mysqli_free_result($result);
+
+        stampalistafoto($fotolist);
+
+        mysqli_close($mysqli);
+    }
+
+    function generateUrl($nomefile){
+        return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
+    }
+
+    function stampalistafoto($fotolist){
+        echo'<div class="col-md-4">';
+        $i=0;
+        foreach($fotolist as $foto){
+            $i++;
+            if($i>5) {
+                echo'</div>';
+                echo'<div class="col-md-4">';
+                $i=0;
             }
+            echo '<div class="panel panel-default">
+                    <div class="panel-heading">
+                        '.$foto['NOME'].'
+                    </div>
+                    <div class="panel-body" style="font-size: 17px;">
+                        <img src="'.generateUrl($foto['NOME']).'"
+                            style="width: 100%; height: auto;"></br></br>
+                        <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
+                        <b>Tag</b>:
+                        <ul>
+                            <li>Sfuocata</li>
+                            <li>Scura</li>
+                            <li>Inclinata</li>
+                        </ul>
+                        <b>Ingredienti</b>: "'.$foto['INGREDIENTI'].'"
+                    </div>
+                </div>';
         }
+        echo'</div>'; //fine <div class="col-md-4">
     }
 ?>
 
@@ -320,309 +353,12 @@
 
 
                 <div class="row">
-                    <div class="col-md-4">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Nome foto 1
-                            </div>
-                            <div class="panel-body" style="font-size: 17px;">
-                                <img src="https://images.wallpaperscraft.com/image/everest_mountain_sky_tops_96976_1920x1080.jpg"
-                                    style="width: 100%; height: auto;"></br></br>
-                                <b>Tag</b>:
-                                <ul>
-                                    <li>Sfuocata</li>
-                                    <li>Scura</li>
-                                    <li>Inclinata</li>
-                                </ul>
-                                <b>Ingredienti</b>: "At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                                blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas
-                                molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa
-                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga."
-                            </div>
-                        </div>
-                    </div>
+                    <!-- visualizzazione delle foto -->
+                    <?php
+                    if($_SERVER["REQUEST_METHOD"] == "GET") {
+                        get();
+                    }
+                    ?>
 
                     <div class="row">
                         <div class="col-md-6 col-md-offset-3">
