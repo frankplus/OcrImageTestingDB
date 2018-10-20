@@ -9,6 +9,13 @@
             die("Connection failed: " . $conn->connect_error);
         }
 
+        $fotolist = generaListaFoto($mysqli);
+        stampaListaFoto($mysqli, $fotolist);
+
+        mysqli_close($mysqli);
+    }
+
+    function generaListaFoto($mysqli){
         /*
             creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
             i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
@@ -81,17 +88,32 @@
         $result = mysqli_query($mysqli, $selectfotosql);
         $fotolist = mysqli_fetch_all($result,MYSQLI_ASSOC);
         mysqli_free_result($result);
+        return $fotolist;
+    }
 
-        stampalistafoto($fotolist);
+    function generateTagList($mysqli, $idfoto){
+        $sql = "SELECT tag.NOME FROM tag
+                INNER JOIN fototag ON tag.ID = fototag.IDTAG
+                WHERE fototag.IDFOTO = $idfoto";
+        $result = mysqli_query($mysqli, $sql);
+        $taglist = mysqli_fetch_all($result,MYSQLI_ASSOC);
+        mysqli_free_result($result);
+        return $taglist;
+    }
 
-        mysqli_close($mysqli);
+    function printTagList($taglist){
+        $htmltaglist = '';
+        foreach($taglist as $tag){
+            $htmltaglist .= '<li>'.$tag['NOME'].'</li>';
+        }
+        return $htmltaglist;
     }
 
     function generateUrl($nomefile){
         return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
     }
 
-    function stampalistafoto($fotolist){
+    function stampaListaFoto($mysqli, $fotolist){
         echo'<div class="row">';
         $i=0;
         foreach($fotolist as $foto){
@@ -113,16 +135,14 @@
                             <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
                             <b>Tag</b>:
                             <ul>
-                                <li>Sfuocata</li>
-                                <li>Scura</li>
-                                <li>Inclinata</li>
+                                '.printTagList(generateTagList($mysqli,$foto['ID'])).'
                             </ul>
                             <b>Ingredienti</b>: "'.$foto['INGREDIENTI'].'"
                         </div>
                     </div>
                 </div>';
         }
-        echo'</div>'; //fine <div class="col-md-4">
+        echo'</div>'; //fine <div class="row">
     }
 ?>
 
