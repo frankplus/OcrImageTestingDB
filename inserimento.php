@@ -80,39 +80,34 @@ function post($mysqli){
       $current_photo_id =  ((int)$row["MAX(ID)"] + 1);
     }
 
-    //load photo - DA COMPLETARE!!
-    //TODO make the photo name like "photo"+current_photo_id
 
-    //echo var_dump($_FILES['immagine']) . "<br>";
+    //prendo foto e la salvo in foto/
     $file_ext="";
     if(isset($_FILES['immagine'])){
-        $errors= array();
-
         $file_name = "foto".$current_photo_id;
+        $path = $_FILES['immagine']['name'];
         $file_tmp =$_FILES['immagine']['tmp_name'];
         $file_size = $_FILES['immagine']['size'];
-        //check if image
         $file_type=$_FILES['immagine']['type'];
 
-        //$file_ext=strtolower(end(explode('.',$_FILES['immagine']['name'])));
-
-        $path = $_FILES['immagine']['name'];
+        //check extensione
         $file_ext = pathinfo($path, PATHINFO_EXTENSION);
         $expensions= array("jpeg","jpg","png");
         if(in_array($file_ext,$expensions)=== false){
-            $errors[]="extension not allowed, please choose a JPEG or PNG file.";
+            throw new Exception("Estensione file non supportata.");
         }
-        if($file_size > 5242880){
-            $errors[]='File size must be under 5 MB';
-        }
-        if(empty($errors)==true){
-          //TODO uploading file to dir not working
-          move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name.".".$file_ext);
 
-        }else{
-            throw new Exception();
+        if($file_size > 5242880){
+            throw new Exception("Dimensione massima: 5 MB.");
         }
+        if(!move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name.".".$file_ext)) {
+          throw new Exception("Errore nel caricamento del file.");
+        }
+    } else {
+      throw new Exception("File mancante.");
     }
+
+
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     $photo_name = "foto";
     $photo_name .= $current_photo_id;
@@ -130,9 +125,11 @@ function post($mysqli){
     }
     */
     $ingredient_array = explode(",", $ingredienti);
+    //create json desc
     $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array));
+    //create and write file
     $description_path = "foto/foto" . $current_photo_id . ".txt";
-    $description_file = fopen("foto/foto".$current_photo_id.".txt", "w");
+    $description_file = fopen($description_path, "w");
     fwrite($description_file, $description_json);
     fclose($description_file);
 
@@ -160,18 +157,6 @@ function post($mysqli){
 
 }
 
-
-//insert description and photo data with BLOB
-//credits https://blogs.oracle.com/oswald/phps-mysqli-extension:-storing-and-retrieving-blobs
-/*
-$stmt = $mysqli->prepare("INSERT INTO photos (photo_id, photo_desc, photo_data) VALUES(NULL, ?, ?)");
-$null = NULL;
-$stmt->bind_param("sb", $photo_desc, $null);
-//1 indicates which parameter to associate the data with
-$stmt->send_long_data(1, file_get_contents("test_photo.jpg"));
-$stmt->execute();
-$stmt->close();
-*/
 ?>
 <!DOCTYPE html>
 <html lang="en">
