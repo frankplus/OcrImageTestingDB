@@ -14,14 +14,28 @@
             die("Connection failed: " . $conn->connect_error);
         }
 
-        $fotolist = generaListaFoto($mysqli);
+        $fotolist = array();
+        if(isset($_GET['nomeFoto']) && $_GET['nomeFoto']!='') $fotolist = selezionaFotoPerNome($mysqli);
+        else $fotolist = generaListaFotoFiltrata($mysqli);
         stampaListaFoto($mysqli, $fotolist);
 
         mysqli_close($mysqli);
     }
 
+    function selezionaFotoPerNome($mysqli){
+        $nomefoto = $_GET['nomeFoto'];
+        $sql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto WHERE foto.NOME = '$nomefoto'";
+        $result = mysqli_query($mysqli, $sql);
+        $fotoarray = array();
+        if ($result && mysqli_num_rows($result) > 0) {
+            $fotoarray = mysqli_fetch_all($result,MYSQLI_ASSOC);
+            mysqli_free_result($result);
+        }
+        return $fotoarray;
+    }
+
     //questa funzione seleziona le foto dal database e le inserisce in un'array pronto per essere visualizzato
-    function generaListaFoto($mysqli){
+    function generaListaFotoFiltrata($mysqli){
         /*
             creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
             i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
@@ -378,7 +392,7 @@
 
                             <div class="form-group">
                                 <label>Nome foto</label>
-                                <input class="form-control" name="nomeFoto" placeholder="Lasciare vuoto per non cercare in base al nome">
+                                <input class="form-control" type="text" name="nomeFoto" placeholder="Lasciare vuoto per non cercare in base al nome">
                             </div>
                             <button type="submit" class="btn btn-primary">Cerca</button>
                         </form>
