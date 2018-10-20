@@ -1,3 +1,101 @@
+<?php
+    if($_SERVER["REQUEST_METHOD"] == "GET") {
+        include 'database_info.php';
+        //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
+        $mysqli=mysqli_connect($dbhost,$dbuser,$dbpass,$dbname);
+        // Check connection
+        if ($mysqli->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        
+        get($mysqli);
+    }
+
+    function get($mysqli){
+        /*
+            creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
+            i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
+            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
+        */
+        $tags_array = array();
+        if(isset($_GET['inclinazione'])){
+            if($_GET['inclinazione'] == 'si') array_push($tags_array, "inclinata");
+            else array_push($tags_array, "non_inclinata");
+        } else array_push($tags_array, "inclinata", "non_inclinata");
+
+        if(isset($_GET['angolazione'])){
+            if($_GET['angolazione'] == 'si') array_push($tags_array, "angolata");
+            else array_push($tags_array, "non_angolata");
+        } else array_push($tags_array, "angolata", "non_angolata");
+
+        if(isset($_GET['testoPresente'])){
+            if($_GET['testoPresente'] == 'si') array_push($tags_array, "testo_presente");
+            else array_push($tags_array, "testo_non_presente");
+        } else array_push($tags_array, "testo_presente", "testo_non_presente");
+
+        if(isset($_GET['luce'])){
+            if($_GET['luce'] == 'poca') array_push($tags_array, "poca_luce");
+            else if($_GET['luce'] == 'ottimale') array_push($tags_array, "luce_ottimale");
+            else if($_GET['luce'] == 'troppa') array_push($tags_array, "troppa_luce");
+        } else array_push($tags_array, "poca_luce", "luce_ottimale", "troppa_luce");
+
+        if(isset($_GET['etichettaPiana'])){
+            if($_GET['etichettaPiana'] == 'si') array_push($tags_array, "etichetta_piana");
+            else array_push($tags_array, "etichetta_non_piana");
+        } else array_push($tags_array, "etichetta_piana", "etichetta_non_piana");
+
+        if(isset($_GET['caratteriDanneggiati'])){
+            if($_GET['caratteriDanneggiati'] == 'si') array_push($tags_array, "caratteri_danneggiati");
+            else array_push($tags_array, "caratteri_non_danneggiati");
+        } else array_push($tags_array, "caratteri_danneggiati", "caratteri_non_danneggiati");
+        
+        if(isset($_GET['immagineNitida'])){
+            if($_GET['immagineNitida'] == 'si') array_push($tags_array, "nitida");
+            else array_push($tags_array, "sfuocata");
+        } else array_push($tags_array, "nitida", "sfuocata");
+
+        if(isset($_GET['mossa'])){
+            if($_GET['mossa'] == 'si') array_push($tags_array, "foto_mossa");
+            else array_push($tags_array, "foto_non_mossa");
+        } else array_push($tags_array, "foto_mossa", "foto_non_mossa");
+
+        if(isset($_GET['risoluzione'])){
+            if($_GET['risoluzione'] == 'si') array_push($tags_array, "alta_risoluzione");
+            else array_push($tags_array, "bassa_risoluzione");
+        } else array_push($tags_array, "alta_risoluzione", "bassa_risoluzione");
+
+        $tags = "'".implode("','", $tags_array)."'";
+
+        //$idtagssql = "SELECT ID FROM tag WHERE NOME IN ('$tags')";
+        //$idfotosql = 'SELECT IDFOTO FROM fototag WHERE IDTAG IN ($idtagssql) GROUP BY IDFOTO HAVING COUNT(IDFOTO) = {count($tags_array)}';
+        //$fotosql = 'SELECT * FROM foto WHERE ID IN ($idfotosql)';
+
+        $selectfotosql = $mysqli->prepare("
+        SELECT * FROM foto 
+        WHERE ID IN (
+            SELECT IDFOTO 
+            FROM fototag 
+            WHERE IDTAG IN (
+                SELECT ID 
+                FROM tag 
+                WHERE NOME IN (?) 
+            )
+            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = ?
+        )
+        ");
+        $selectfotosql->bind_param("si", $tags, count($tags_array));
+        $selectfotosql->execute();
+        $result = $selectfotosql->get_result();
+        var_dump($result);
+        if ($result->num_rows > 0) {
+            // output data of each row
+            while($row = $result->fetch_assoc()) {
+                var_dump($row);
+            }
+        }
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,10 +144,10 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="index.html"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
+                            <a href="index.php"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
                         </li>
                         <li>
-                            <a href="visualizza.html"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
+                            <a href="visualizza.php"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
                         </li>
                         <li>
                             <a href="logout.php"><i class="fa fa-key fa-fw"></i> Logout</a>
@@ -130,10 +228,10 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Luce</label>
-                                        <select class="form-control">
-                                            <option>Poca luce</option>
-                                            <option>Luce ottimale</option>
-                                            <option>Troppa luce</option>
+                                        <select name="luce" class="form-control">
+                                            <option value="poca">Poca luce</option>
+                                            <option value="ottimale">Luce ottimale</option>
+                                            <option value="troppa">Troppa luce</option>
                                         </select>
                                     </div>
                                 </div>   
