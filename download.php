@@ -3,20 +3,6 @@ session_start();
 if (!isset( $_SESSION['user'] ) ) {
     echo '<script>window.location.href = "http://localhost/index.php";</script>';
 }
-if(isset($_POST["download"]))
-    {
-        $zip = new ZipArchive;
-        $download = 'tmp/fotoDb.zip';
-        $zip->open($download, ZipArchive::CREATE);
-        foreach (glob("foto/*") as $file) {
-            $zip->addFile($file);
-        }
-        $zip->close();
-
-        header('Content-Type: application/zip');
-        header("Content-Disposition: attachment; filename = $download");
-        header('Content-Length: ' . filesize($download));
-    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,10 +85,23 @@ if(isset($_POST["download"]))
                         Scarica paccheteto foto con metadati
                     </div>
                     <div class="panel-body">
-                        <form method="POST" action="#">
-                            <input type="hidden" name="download">
-                            <button type="submit" class="btn btn-primary">Scarica</button>
-                        </form>
+                            <?php
+                                
+                                    $zip = new ZipArchive;
+                                    $download = 'tmp/fotoDb.zip';
+                                    $zip->open($download, ZipArchive::CREATE);
+                                    foreach (glob("foto/*") as $file) {
+                                        $zip->addFile($file);
+                                    }
+                                    $zip->close();
+
+                                    
+                                    /*header('Content-Type: application/zip');
+                                    header("Content-Disposition: attachment; filename = $download");
+                                    header('Content-Length: ' . filesize($download));*/
+                                    echo '<H2><a href="http://localhost/tmp/fotoDb.zip">Scarica</button></H2>';
+                                
+                            ?>
                     </div>
                 </div>
 
