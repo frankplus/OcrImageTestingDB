@@ -128,7 +128,7 @@
             if($i>3) {
                 echo'</div>';
                 echo'<div class="row">';
-                $i=0;
+                $i=1;
             }
             echo '
                 <div class="col-md-4">
