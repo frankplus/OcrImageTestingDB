@@ -52,7 +52,13 @@ function post($mysqli){
 
     $attr_array = array($inclinazione, $angolazione, $risoluzione, $testoPresente, $luce, $etichettaPiana, $caratteriDanneggiati, $immagineNitida, $mossa, $risoluzione);
 
-    $ingredienti = $_POST['ingredienti'];
+    if("" == trim($_POST['ingredienti'])) {
+      throw new Exception("lista ingredienti vuota");
+
+    } else {
+      $ingredienti = $_POST['ingredienti'];
+    }
+
 
     //get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
     $tags_id_array = array();
