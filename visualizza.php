@@ -70,26 +70,20 @@
         //$idfotosql = 'SELECT IDFOTO FROM fototag WHERE IDTAG IN ($idtagssql) GROUP BY IDFOTO HAVING COUNT(IDFOTO) = {count($tags_array)}';
         //$fotosql = 'SELECT * FROM foto WHERE ID IN ($idfotosql)';
 
-        $selectfotosql = $mysqli->prepare("
-        SELECT * FROM foto 
-        WHERE ID IN (
-            SELECT IDFOTO 
-            FROM fototag 
-            WHERE IDTAG IN (
-                SELECT ID 
-                FROM tag 
-                WHERE NOME IN (?) 
-            )
-            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = ?
+        $selectfotosql = "SELECT * FROM foto
+        INNER JOIN fototag ON foto.ID = fototag.IDFOTO
+        WHERE IDTAG IN (
+            SELECT ID 
+            FROM tag 
+            WHERE NOME IN ($tags) 
         )
-        ");
-        $selectfotosql->bind_param("si", $tags, count($tags_array));
-        $selectfotosql->execute();
-        $result = $selectfotosql->get_result();
-        var_dump($result);
-        if ($result->num_rows > 0) {
-            // output data of each row
-            while($row = $result->fetch_assoc()) {
+        GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
+        ";
+
+        //var_dump($selectfotosql);
+        $result = mysqli_query($mysqli, $selectfotosql);
+        if (mysqli_num_rows($result) > 0) {
+            while($row = mysqli_fetch_assoc($result)) {
                 var_dump($row);
             }
         }
