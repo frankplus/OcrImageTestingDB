@@ -92,30 +92,33 @@
     }
 
     function stampalistafoto($fotolist){
-        echo'<div class="col-md-4">';
+        echo'<div class="row">';
         $i=0;
         foreach($fotolist as $foto){
             $i++;
-            if($i>5) {
+            if($i>3) {
                 echo'</div>';
-                echo'<div class="col-md-4">';
+                echo'<div class="row">';
                 $i=0;
             }
-            echo '<div class="panel panel-default">
-                    <div class="panel-heading">
-                        '.$foto['NOME'].'
-                    </div>
-                    <div class="panel-body" style="font-size: 17px;">
-                        <img src="'.generateUrl($foto['NOME']).'"
-                            style="width: 100%; height: auto;"></br></br>
-                        <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
-                        <b>Tag</b>:
-                        <ul>
-                            <li>Sfuocata</li>
-                            <li>Scura</li>
-                            <li>Inclinata</li>
-                        </ul>
-                        <b>Ingredienti</b>: "'.$foto['INGREDIENTI'].'"
+            echo '
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            '.$foto['NOME'].'
+                        </div>
+                        <div class="panel-body" style="font-size: 17px;">
+                            <img src="'.generateUrl($foto['NOME']).'"
+                                style="width: 100%; height: auto;"></br></br>
+                            <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
+                            <b>Tag</b>:
+                            <ul>
+                                <li>Sfuocata</li>
+                                <li>Scura</li>
+                                <li>Inclinata</li>
+                            </ul>
+                            <b>Ingredienti</b>: "'.$foto['INGREDIENTI'].'"
+                        </div>
                     </div>
                 </div>';
         }
