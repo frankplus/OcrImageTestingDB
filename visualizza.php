@@ -6,7 +6,7 @@
 
     include 'database_info.php';
     function get(){
-        
+
         //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
         $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
         // Check connection
@@ -24,7 +24,7 @@
 
     function selezionaFotoPerNome($mysqli){
         $nomefoto = $_GET['nomeFoto'];
-        $sql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto WHERE foto.NOME = '$nomefoto'";
+        $sql = "SELECT FOTO.ID,FOTO.NOME,FOTO.INGREDIENTI FROM FOTO WHERE FOTO.NOME = '$nomefoto'";
         $result = mysqli_query($mysqli, $sql);
         $fotoarray = array();
         if ($result && mysqli_num_rows($result) > 0) {
@@ -39,7 +39,7 @@
         /*
             creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
             i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
-            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
+            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.
         */
         $tags_array = array();
         if(isset($_GET['inclinazione'])){
@@ -73,7 +73,7 @@
             if($_GET['caratteriDanneggiati'] == 'si') array_push($tags_array, "caratteri_danneggiati");
             else array_push($tags_array, "caratteri_non_danneggiati");
         } else array_push($tags_array, "caratteri_danneggiati", "caratteri_non_danneggiati");
-        
+
         if(isset($_GET['immagineNitida'])){
             if($_GET['immagineNitida'] == 'si') array_push($tags_array, "nitida");
             else array_push($tags_array, "sfuocata");
@@ -92,12 +92,12 @@
         $tags = "'".implode("','", $tags_array)."'";
 
         //creazione della query
-        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
-        INNER JOIN fototag ON foto.ID = fototag.IDFOTO
+        $selectfotosql = "SELECT FOTO.ID,FOTO.NOME,FOTO.INGREDIENTI FROM FOTO
+        INNER JOIN FOTOTAG ON FOTO.ID = FOTOTAG.IDFOTO
         WHERE IDTAG IN (
-            SELECT ID 
-            FROM tag 
-            WHERE NOME IN ($tags) 
+            SELECT ID
+            FROM TAG
+            WHERE NOME IN ($tags)
         )
         GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
         ";
@@ -110,9 +110,9 @@
 
     //selezione dei tag corrispondenti ad una foto
     function generateTagList($mysqli, $idfoto){
-        $sql = "SELECT tag.NOME FROM tag
-                INNER JOIN fototag ON tag.ID = fototag.IDTAG
-                WHERE fototag.IDFOTO = $idfoto";
+        $sql = "SELECT TAG.NOME FROM TAG
+                INNER JOIN FOTOTAG ON TAG.ID = FOTOTAG.IDTAG
+                WHERE FOTOTAG.IDFOTO = $idfoto";
         $result = mysqli_query($mysqli, $sql);
         $taglist = mysqli_fetch_all($result,MYSQLI_ASSOC);
         mysqli_free_result($result);
@@ -265,7 +265,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div> 
+                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Angolazione</label>
@@ -280,7 +280,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>    
+                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Testo</label>
@@ -297,7 +297,7 @@
                                     </div>
                                 </div>
                             </div>
-    
+
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -309,7 +309,7 @@
                                             <option value="troppa">Troppa luce</option>
                                         </select>
                                     </div>
-                                </div>   
+                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Etichetta</label>
@@ -356,7 +356,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div> 
+                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Mossa</label>
@@ -371,7 +371,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>   
+                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Risoluzione della foto</label>
@@ -400,7 +400,7 @@
                 </div>
 
 
-                
+
                 <!-- visualizzazione delle foto -->
                 <?php
                 if($_SERVER["REQUEST_METHOD"] == "GET") {
@@ -428,7 +428,7 @@
 
                     </div>
                 </div>-->
-                
+
 
             </div>
             <!-- /.row -->
