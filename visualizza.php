@@ -4,10 +4,13 @@
     header("location: /index.php");
     }
     $pag="";
+    //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
+    $immaginiPerPagina="1";
     if(!isset($_GET["pag"]))
     {
         header("location: /visualizza.php?pag=0");
     }
+
 
     include 'database_info.php';
     function get(){
@@ -124,7 +127,7 @@
         */
 
         $tags=generaStringaTag();
-
+        global $immaginiPerPagina;
         $pagina="";
         if(isset($_GET["pag"]))
         {
@@ -144,7 +147,7 @@
                 WHERE NOME IN ($tags) 
             )
             GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
-            LIMIT $pagina,2
+            LIMIT $pagina,$immaginiPerPagina
         ";
 
         $result = mysqli_query($mysqli, $selectfotosql);
@@ -263,7 +266,7 @@
                             <a href="inserimento.php"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
                         </li>
                         <li>
-                            <a href="visualizza.php"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
+                            <a href="visualizza.php?pag=0"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
                         </li>
                         <li>
                             <a href="download.php"><i class="fa fa-download fa-fw"></i> Download dati</a>
@@ -469,9 +472,9 @@
                             <?php 
                                     
                                     
-
+                                    global $immaginiPerPagina;
                                     parse_str($_SERVER['QUERY_STRING'], $query_string);
-                                    $query_string['pag'] = ($query_string['pag']-2);
+                                    $query_string['pag'] = ($query_string['pag']-$immaginiPerPagina);
                                     $nuovaQueryIndietro = http_build_query($query_string);
 
                                     $pagina = $_GET["pag"];
@@ -493,16 +496,16 @@
                                     //0   2    4    6    8
 
 
-                                    $numeroPagine = ($numeroRighe/2); // 2 Foto per pagina
+                                    $numeroPagine = ($numeroRighe/$immaginiPerPagina); // 2 Foto per pagina
                                     $ultimaPagina = false;
                                     for($i=0;$i<$numeroPagine;$i++)
                                     {
                                         parse_str($_SERVER['QUERY_STRING'], $query_string);
                                         $pagAttuale=$query_string['pag'];
-                                        $query_string['pag'] = ($i*2);
+                                        $query_string['pag'] = ($i*$immaginiPerPagina);
                                         $rdr_str = http_build_query($query_string);
                                       
-                                        if(($pagAttuale/2)==($i))
+                                        if(($pagAttuale/$immaginiPerPagina)==($i))
                                         {
                                             echo '<li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="http://localhost/visualizza.php?'.$rdr_str.'">'.($i+1).'</a></li>';
                                             $ultimaPagina = true;
@@ -525,7 +528,7 @@
                                     else
                                     {
                                         parse_str($_SERVER['QUERY_STRING'], $query_string);
-                                        $query_string['pag'] = ($query_string['pag']+2);
+                                        $query_string['pag'] = ($query_string['pag']+$immaginiPerPagina);
                                         $nuovaQueryAvanti = http_build_query($query_string);
                                         echo '<li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a
                                         href="http://localhost/visualizza.php?'.$nuovaQueryAvanti.'">Sucessiva</a></li>';

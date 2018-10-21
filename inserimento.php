@@ -215,7 +215,7 @@ function post($mysqli){
                             <a href="inserimento.php"><i class="fa fa-pencil fa-fw"></i> Inserimento dati</a>
                         </li>
                         <li>
-                            <a href="visualizza.php"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
+                            <a href="visualizza.php?pag=0"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
                         </li>
                         <li>
                             <a href="download.php"><i class="fa fa-download fa-fw"></i> Download dati</a>
