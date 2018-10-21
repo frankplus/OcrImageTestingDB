@@ -3,6 +3,11 @@
     if (!isset( $_SESSION['user'] ) ) {
     header("location: /index.php");
     }
+    $pag="";
+    if(!isset($_GET["pag"]))
+    {
+        header("location: /visualizza.php?pag=0");
+    }
 
     include 'database_info.php';
     function get(){
@@ -34,13 +39,8 @@
         return $fotoarray;
     }
 
-    //questa funzione seleziona le foto dal database e le inserisce in un'array pronto per essere visualizzato
-    function generaListaFotoFiltrata($mysqli){
-        /*
-            creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
-            i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
-            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
-        */
+    function generaStringaTag()
+    {
         $tags_array = array();
         if(isset($_GET['inclinazione'])){
             if($_GET['inclinazione'] == 'si') array_push($tags_array, "inclinata");
@@ -90,16 +90,61 @@
         } else array_push($tags_array, "alta_risoluzione", "bassa_risoluzione");
 
         $tags = "'".implode("','", $tags_array)."'";
+        return $tags;
+    }
+
+    function numeroRighe()
+    {
+        $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
+        // Check connection
+        if ($mysqli->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        $tags=generaStringaTag();
+        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
+            INNER JOIN fototag ON foto.ID = fototag.IDFOTO
+            WHERE IDTAG IN (
+                SELECT ID 
+                FROM tag 
+                WHERE NOME IN ($tags) 
+            )
+            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9";
+        $result = mysqli_query($mysqli, $selectfotosql);
+        $rows = mysqli_num_rows($result);
+        mysqli_close($mysqli);
+        return $rows;
+
+    }
+    //questa funzione seleziona le foto dal database e le inserisce in un'array pronto per essere visualizzato
+    function generaListaFotoFiltrata($mysqli){
+        /*
+            creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
+            i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
+            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
+        */
+
+        $tags=generaStringaTag();
+
+        $pagina="";
+        if(isset($_GET["pag"]))
+        {
+            $pagina=$_GET["pag"];
+        }
+        else
+        {
+            $pagina="0";
+        }
 
         //creazione della query
         $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
-        INNER JOIN fototag ON foto.ID = fototag.IDFOTO
-        WHERE IDTAG IN (
-            SELECT ID 
-            FROM tag 
-            WHERE NOME IN ($tags) 
-        )
-        GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
+            INNER JOIN fototag ON foto.ID = fototag.IDFOTO
+            WHERE IDTAG IN (
+                SELECT ID 
+                FROM tag 
+                WHERE NOME IN ($tags) 
+            )
+            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
+            LIMIT $pagina,2
         ";
 
         $result = mysqli_query($mysqli, $selectfotosql);
@@ -107,7 +152,7 @@
         mysqli_free_result($result);
         return $fotolist;
     }
-
+    
     //selezione dei tag corrispondenti ad una foto
     function generateTagList($mysqli, $idfoto){
         $sql = "SELECT tag.NOME FROM tag
@@ -249,7 +294,8 @@
                     </div>
                     <div class="panel-body">
                         <form method="GET" action="#">
-
+                            <!-- Pagina iniziale 0-->
+                            <input type="hidden" name="pag" value=0>
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
@@ -402,32 +448,97 @@
 
                 
                 <!-- visualizzazione delle foto -->
+
                 <?php
                 if($_SERVER["REQUEST_METHOD"] == "GET") {
+
+                    $numeroRighe=numeroRighe(); //numero di foto uscite dal filtro
+                    
+                    echo "<h3>Risultato ricerca: $numeroRighe foto</h3><br>";
+
                     get();
                 }
                 ?>
 
-                <!--<div class="row">
+                <div class="row">
                     <div class="col-md-6 col-md-offset-3">
 
                         <ul class="pagination">
-                            <li class="paginate_button previous disabled" aria-controls="dataTables-example"
-                                tabindex="0"><a href="#">Previous</a></li>
-                            <li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a
-                                    href="#">1</a></li>
-                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li>
-                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li>
-                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li>
-                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li>
-                            <li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li>
-                            <li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a
-                                    href="#">Next</a></li>
+                            
+
+                            <?php 
+                                    
+                                    
+
+                                    parse_str($_SERVER['QUERY_STRING'], $query_string);
+                                    $query_string['pag'] = ($query_string['pag']-2);
+                                    $nuovaQueryIndietro = http_build_query($query_string);
+
+                                    $pagina = $_GET["pag"];
+                                    if($pagina==0)
+                                    {
+                                        echo '<li class="paginate_button previous disabled" aria-controls="dataTables-example"
+                                        tabindex="0"><a href="#">Precedente</a></li>';
+                                    }
+                                    else
+                                    {
+                                        echo '<li class="paginate_button previous" aria-controls="dataTables-example"
+                                        tabindex="0"><a href="http://localhost/visualizza.php?'.$nuovaQueryIndietro.'">Precedente</a></li>';
+                                    }
+
+                                    //Stampo tutte le pagine
+                                    
+
+                                    //1   2    3    4    5
+                                    //0   2    4    6    8
+
+
+                                    $numeroPagine = ($numeroRighe/2); // 2 Foto per pagina
+                                    $ultimaPagina = false;
+                                    for($i=0;$i<$numeroPagine;$i++)
+                                    {
+                                        parse_str($_SERVER['QUERY_STRING'], $query_string);
+                                        $pagAttuale=$query_string['pag'];
+                                        $query_string['pag'] = ($i*2);
+                                        $rdr_str = http_build_query($query_string);
+                                      
+                                        if(($pagAttuale/2)==($i))
+                                        {
+                                            echo '<li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="http://localhost/visualizza.php?'.$rdr_str.'">'.($i+1).'</a></li>';
+                                            $ultimaPagina = true;
+                                        }
+                                        else
+                                        {
+                                            echo '<li class="paginate_button" aria-controls="dataTables-example" tabindex="0"><a href="http://localhost/visualizza.php?'.$rdr_str.'">'.($i+1).'</a></li>';
+                                            $ultimaPagina = false;
+                                        }
+                                        
+                                        
+                                    }
+
+                                    
+                                    if($ultimaPagina==true)
+                                    {
+                                        echo '<li class="paginate_button next disabled" aria-controls="dataTables-example" tabindex="0"><a
+                                        href="#">Sucessiva</a></li>';
+                                    }
+                                    else
+                                    {
+                                        parse_str($_SERVER['QUERY_STRING'], $query_string);
+                                        $query_string['pag'] = ($query_string['pag']+2);
+                                        $nuovaQueryAvanti = http_build_query($query_string);
+                                        echo '<li class="paginate_button next" aria-controls="dataTables-example" tabindex="0"><a
+                                        href="http://localhost/visualizza.php?'.$nuovaQueryAvanti.'">Sucessiva</a></li>';
+                                    }
+                                    
+                            ?>
+                            
+                            
                         </ul>
 
 
                     </div>
-                </div>-->
+                </div>
                 
 
             </div>
