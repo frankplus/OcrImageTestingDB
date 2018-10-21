@@ -9,7 +9,7 @@ if (!isset( $_SESSION['user'] ) ) {
   header("location: /index.php");
 }
 
-
+$photo_base_name = "foto";
 include 'database_info.php';
 //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
 $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
@@ -38,8 +38,44 @@ function printNumFoto($mysqli)
     echo $rows[0];
 }
 
-//echo "Connected successfully";
+function get_tags_id($mysqli, $attr_array) {
+  $tags_id_array = array();
+  $sql = "SELECT * FROM tag";
+  $result = mysqli_query($mysqli, $sql);
+  if (mysqli_num_rows($result) > 0) {
+      // output data of each row
+      while($row = mysqli_fetch_assoc($result)) {
+          foreach($attr_array as &$value) {
+            if($value == $row["NOME"]) {
+                array_push($tags_id_array, (int)$row["ID"]);
+            }
+          }
+      }
+  }
+  return $tags_id_array;
+}
+
+function get_photo_number($mysqli) {
+  $photo_number = 0;
+  $sql = "SELECT MAX(ID) FROM foto";
+  $result = mysqli_query($mysqli, $sql);
+  if($result != NULL) {
+    $row = $result->fetch_assoc();
+    $photo_number =  ((int)$row["MAX(ID)"] + 1);
+  }
+  return $photo_number;
+}
+function is_image($photo_extension) {
+  $expensions= array("jpeg","jpg","png");
+  if(!in_array($photo_extension,$expensions)){
+      return false;
+  }
+  return true;
+}
+
+
 function post($mysqli){
+    global $photo_base_name;
     $inclinazione = $_POST['inclinazione'];
     $angolazione = $_POST['angolazione'];
     $testoPresente = $_POST['testoPresente'];
@@ -49,9 +85,6 @@ function post($mysqli){
     $immagineNitida = $_POST['immagineNitida'];
     $mossa = $_POST['mossa'];
     $risoluzione= $_POST['risoluzione'];
-
-    $attr_array = array($inclinazione, $angolazione, $risoluzione, $testoPresente, $luce, $etichettaPiana, $caratteriDanneggiati, $immagineNitida, $mossa, $risoluzione);
-
     if("" == trim($_POST['ingredienti'])) {
       throw new Exception("lista ingredienti vuota");
 
@@ -59,68 +92,36 @@ function post($mysqli){
       $ingredienti = $_POST['ingredienti'];
     }
 
+    $attr_array = array($inclinazione, $angolazione, $testoPresente, $luce, $etichettaPiana, $caratteriDanneggiati, $immagineNitida, $mossa, $risoluzione);
 
     //get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
-    $tags_id_array = array();
-    $sql = "SELECT * FROM tag";
-    $result = mysqli_query($mysqli, $sql);
-    if (mysqli_num_rows($result) > 0) {
-        // output data of each row
-        while($row = mysqli_fetch_assoc($result)) {
-            foreach($attr_array as &$value) {
-              if($value == $row["NOME"]) {
-                  array_push($tags_id_array, (int)$row["ID"]);
-              }
-            }
-        }
-    }
+
+    $tags_id_array = get_tags_id($mysqli, $attr_array);
+
 
     //get last id inserted - ottendo l'ultimo id usato per identificare le foto, in modo da costruire poi il nome della foto
     //che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
-
-    $current_photo_id = 0;
-    $sql = "SELECT MAX(ID) FROM foto";
-    $result = mysqli_query($mysqli, $sql);
-    if($result != NULL) {
-      $row = $result->fetch_assoc();
-      $current_photo_id =  ((int)$row["MAX(ID)"] + 1);
-    }
+    $photo_number = get_photo_number($mysqli);
+    $photo_base_name .= $photo_number;
 
 
     //prendo foto e la salvo in foto/
-    $file_ext="";
-    if(isset($_FILES['immagine'])){
-        $file_name = "foto".$current_photo_id;
-        $path = $_FILES['immagine']['name'];
-        $file_tmp =$_FILES['immagine']['tmp_name'];
-        $file_size = $_FILES['immagine']['size'];
-        $file_type=$_FILES['immagine']['type'];
+    $photo_extension = "";
+    if(isset($_FILES['immagine'])) {
+      $photo_extension =  pathinfo($_FILES['immagine']['name'], PATHINFO_EXTENSION);
+      if(!is_image($photo_extension)) {
+        throw new Exception("Formato immagine non valido");
+      }
+      if($_FILES['immagine']['size'] > 5242880){
+          throw new Exception("Dimensione massima: 5 MB.");
+      }
 
-        //check extensione
-        $file_ext = pathinfo($path, PATHINFO_EXTENSION);
-        $expensions= array("jpeg","jpg","png");
-        if(in_array($file_ext,$expensions)=== false){
-            throw new Exception("Estensione file non supportata.");
-        }
-
-        if($file_size > 5242880){
-            throw new Exception("Dimensione massima: 5 MB.");
-        }
-        if(!move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$file_name.".".$file_ext)) {
-          throw new Exception("Errore nel caricamento del file.");
-        }
+      if(!move_uploaded_file($_FILES['immagine']['tmp_name'], "foto/".$photo_base_name.".".$photo_extension)) {
+        throw new Exception("Errore nel caricamento del file.");
+      }
     } else {
       throw new Exception("File mancante.");
     }
-
-
-    //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
-    $photo_name = "foto";
-    $photo_name .= $current_photo_id;
-    $photo_name .= ".".$file_ext;
-    $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
-    $stmt->bind_param("iss", $current_photo_id, $photo_name, $ingredienti);
-    $stmt -> execute();
 
     //aggiunta filte .txt descrittivo
     //setto testo descrizione in formato JSON
@@ -131,19 +132,27 @@ function post($mysqli){
     }
     */
     $ingredient_array = explode(",", $ingredienti);
-    //create json desc
     $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array));
-    //create and write file
-    $description_path = "foto/foto" . $current_photo_id . ".txt";
+    //create and write file with json data
+    $description_path = "foto/" . $photo_base_name . ".txt";
     $description_file = fopen($description_path, "w");
     fwrite($description_file, $description_json);
     fclose($description_file);
+
+    //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
+    //$photo_number is used as primary key
+    $photo_name =$photo_base_name . '.' . $photo_extension;
+    $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
+    $stmt->bind_param("iss", $photo_number, $photo_name, $ingredienti);
+    $stmt -> execute();
+
+
 
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
     foreach($tags_id_array as &$tag_id) {
       //senza chiavi esterne è necessario controllare non vi siano righe uguali
       $stmt = $mysqli -> prepare("SELECT * FROM fototag WHERE IDFOTO = ? AND IDTAG = ?");
-      $stmt -> bind_param("ii", $current_photo_id, $tag_id);
+      $stmt -> bind_param("ii", $photo_number, $tag_id);
       $stmt -> execute();
       $stmt->bind_result($id, $fotoid, $tagid);
       $stmt->fetch();
@@ -151,7 +160,7 @@ function post($mysqli){
       //se non vi sono duplicati associo foto al tag
       if($id == NULL) {
         $stmt = $mysqli -> prepare("INSERT INTO fototag (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
-        $stmt -> bind_param("ii", $current_photo_id, $tag_id);
+        $stmt -> bind_param("ii", $photo_number, $tag_id);
         $stmt -> execute();
       }
 
@@ -471,16 +480,16 @@ function post($mysqli){
                             </div>
                         </div>
                         <br>
-                        
-                        
-                        
-                        
-                            
-                            
+
+
+
+
+
+
                             <button type="dd" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#myModal" onclick='upload_image();'>Invia</button>
                             <!-- Button trigger modal -->
-                            
-                            
+
+
                             <!-- Modal -->
                             <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
@@ -498,7 +507,7 @@ function post($mysqli){
                                 <!-- /.modal-dialog -->
                             </div>
 
-                            
+
                         </form>
                 </div>
 
