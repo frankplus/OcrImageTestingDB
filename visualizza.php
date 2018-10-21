@@ -5,7 +5,7 @@
     }
     $pag="";
     //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
-    $immaginiPerPagina="10";
+    $immaginiPerPagina="2";
     if(!isset($_GET["pag"]))
     {
         header("location: /visualizza.php?pag=0");
@@ -471,10 +471,13 @@
 
                 <?php
                 if($_SERVER["REQUEST_METHOD"] == "GET") {
-                    get(); //accesso a database, selezione foto e stampa dei risultati
+
                     $numeroRighe=numeroRighe(); //numero di foto uscite dal filtro
-                    
                     echo "<h3>Risultato ricerca: $numeroRighe foto</h3><br>";
+                    get(); //accesso a database, selezione foto e stampa dei risultati
+                   
+                    
+                    
                 }
                 ?>
 
