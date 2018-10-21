@@ -19,16 +19,15 @@ if ($mysqli->connect_error) {
 }
 
 
-
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    try {
-        post($mysqli);
-        header("location: /inserimento.php?inserita");
-    } catch (Exception $e) {
-        header("location: /inserimento.php?errore&tipo:$e->getMessage()");
-    }
-
+        try {
+            post($mysqli);
+            header("location: /inserimento.php?inserita");
+        } catch (Exception $e) {
+          header("location: /inserimento.php?errore=". $e->getMessage());
+        }
 }
+
 
 function printNumFoto($mysqli)
 {
@@ -172,6 +171,7 @@ function post($mysqli){
 
 }
 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -201,6 +201,8 @@ function post($mysqli){
 </head>
 
 <body>
+
+
 
     <div id="wrapper">
 
@@ -295,9 +297,9 @@ function post($mysqli){
                 if(isset($_GET["errore"]))
                 {
                     echo '<div class="alert alert-danger alert-dismissable">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                            Errore. Assicurati che sia .jpg o .png e minore di 5MB. Assicurati inoltre di aver inserito gli ingredienti.
-                        </div>';
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'
+                            . 'Errore: ' . $_GET['errore']
+                            .'</div>';
                 }
             ?>
               <div class="panel panel-default">
