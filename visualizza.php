@@ -5,7 +5,7 @@
     }
     $pag="";
     //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
-    $immaginiPerPagina="1";
+    $immaginiPerPagina="10";
     if(!isset($_GET["pag"]))
     {
         header("location: /visualizza.php?pag=0");
@@ -98,9 +98,10 @@
         } else array_push($tags_array, "foto_mossa", "foto_non_mossa");
 
         if(isset($_GET['risoluzione'])){
-            if($_GET['risoluzione'] == 'si') array_push($tags_array, "alta_risoluzione");
-            else array_push($tags_array, "bassa_risoluzione");
-        } else array_push($tags_array, "alta_risoluzione", "bassa_risoluzione");
+            if($_GET['risoluzione'] == 'alta') array_push($tags_array, "alta_risoluzione");
+            else if($_GET['risoluzione'] == 'media') array_push($tags_array, "media_risoluzione");
+            else if($_GET['risoluzione'] == 'bassa') array_push($tags_array, "bassa_risoluzione");
+        } else array_push($tags_array, "alta_risoluzione","media_risoluzione", "bassa_risoluzione");
 
         $tags = "'".implode("','", $tags_array)."'";
         return $tags;
@@ -434,15 +435,20 @@
                                 </div>   
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Risoluzione della foto</label>
+                                        <label>Risoluzione</label>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="risoluzione" value="si">Alta risoluzione
+                                                <input type="radio" name="risoluzione" value="alta">Alta risoluzione
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="risoluzione" value="no">Bassa risoluzione
+                                                <input type="radio" name="risoluzione" value="media">Media risoluzione
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="risoluzione" value="bassa">Bassa risoluzione
                                             </label>
                                         </div>
                                     </div>

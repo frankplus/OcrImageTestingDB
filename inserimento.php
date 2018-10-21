@@ -445,10 +445,15 @@ function post($mysqli){
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Risoluzione della foto</label>
+                                            <label>Risoluzione</label>
                                             <div class="radio">
                                                 <label>
                                                     <input type="radio" name="risoluzione" value="alta_risoluzione" checked="">Alta risoluzione
+                                                </label>
+                                            </div>
+                                            <div class="radio">
+                                                <label>
+                                                    <input type="radio" name="risoluzione" value="media_risoluzione">Media risoluzione
                                                 </label>
                                             </div>
                                             <div class="radio">
