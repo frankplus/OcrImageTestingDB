@@ -31,6 +31,11 @@
     }
 
     function selezionaFotoPerNome($mysqli){
+        /*
+            qui viene fatta una selezione filtrata per nome: 
+            viene cercato la foto che possiede tale nome (il nome della foto coincide 
+            con il nome del file estensione compresa)
+        */
         $nomefoto = $_GET['nomeFoto'];
         $sql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto WHERE foto.NOME = '$nomefoto'";
         $result = mysqli_query($mysqli, $sql);
@@ -44,6 +49,11 @@
 
     function generaStringaTag()
     {
+        /*
+            creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
+            i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
+            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
+        */
         $tags_array = array();
         if(isset($_GET['inclinazione'])){
             if($_GET['inclinazione'] == 'si') array_push($tags_array, "inclinata");
@@ -118,14 +128,15 @@
         return $rows;
 
     }
-    //questa funzione seleziona le foto dal database e le inserisce in un'array pronto per essere visualizzato
+    
     function generaListaFotoFiltrata($mysqli){
         /*
-            creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
-            i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
-            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
+            Questa funzione seleziona le foto dal database e le inserisce in un'array 
+            pronto per essere visualizzato.
+            La selezione è filtrata per attributi (tag): alcuni attributi possono 
+            anche non essere specificati, se ciò avviene la ricerca non viene 
+            filtrata per tali attributi.
         */
-
         $tags=generaStringaTag();
         global $immaginiPerPagina;
         $pagina="";
@@ -454,12 +465,10 @@
 
                 <?php
                 if($_SERVER["REQUEST_METHOD"] == "GET") {
-
+                    get(); //accesso a database, selezione foto e stampa dei risultati
                     $numeroRighe=numeroRighe(); //numero di foto uscite dal filtro
                     
                     echo "<h3>Risultato ricerca: $numeroRighe foto</h3><br>";
-
-                    get();
                 }
                 ?>
 
