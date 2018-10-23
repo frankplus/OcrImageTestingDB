@@ -172,7 +172,8 @@
     function generateTagList($mysqli, $idfoto){
         $sql = "SELECT tag.NOME FROM tag
                 INNER JOIN fototag ON tag.ID = fototag.IDTAG
-                WHERE fototag.IDFOTO = $idfoto";
+                WHERE fototag.IDFOTO = $idfoto
+                ORDER BY tag.ID";
         $result = mysqli_query($mysqli, $sql);
         $taglist = mysqli_fetch_all($result,MYSQLI_ASSOC);
         mysqli_free_result($result);
@@ -281,9 +282,9 @@
                         <li>
                             <a href="visualizza.php?pag=0"><i class="fa fa-table fa-fw"></i> Visualizza dati</a>
                         </li>
-                        <li>
+                        <!--<li>
                             <a href="download.php"><i class="fa fa-download fa-fw"></i> Download dati</a>
-                        </li>
+                        </li>-->
                         <li>
                             <a href="logout.php"><i class="fa fa-key fa-fw"></i> Logout</a>
                         </li>
