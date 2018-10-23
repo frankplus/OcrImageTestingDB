@@ -115,7 +115,7 @@
             die("Connection failed: " . $conn->connect_error);
         }
         $tags=generaStringaTag();
-        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
+        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI, foto.NOTE FROM foto
             INNER JOIN fototag ON foto.ID = fototag.IDFOTO
             WHERE IDTAG IN (
                 SELECT ID 
@@ -151,7 +151,7 @@
         }
 
         //creazione della query
-        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto
+        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI, foto.NOTE  FROM foto
             INNER JOIN fototag ON foto.ID = fototag.IDFOTO
             WHERE IDTAG IN (
                 SELECT ID 
@@ -218,7 +218,8 @@
                             <ul>
                                 '.printTagList(generateTagList($mysqli,$foto['ID'])).'
                             </ul>
-                            <b>Ingredienti</b>: "'.$foto['INGREDIENTI'].'"
+                            <b>Ingredienti</b>: '.$foto['INGREDIENTI'].'<br>
+                            <b>Note</b>: '.$foto['NOTE'].'
                         </div>
                     </div>
                 </div>';
