@@ -84,6 +84,9 @@ function post($mysqli){
     $immagineNitida = $_POST['immagineNitida'];
     $mossa = $_POST['mossa'];
     $risoluzione= $_POST['risoluzione'];
+    $note = $_POST['note'];
+
+
     if("" == trim($_POST['ingredienti'])) {
       throw new Exception("lista ingredienti vuota");
 
@@ -106,8 +109,12 @@ function post($mysqli){
 
     //prendo foto e la salvo in foto/
     $photo_extension = "";
+    $original_photo_name = "";
+
     if(isset($_FILES['immagine'])) {
+      $original_photo_name = $_FILES['immagine']['name'];
       $photo_extension =  pathinfo($_FILES['immagine']['name'], PATHINFO_EXTENSION);
+
       if(!is_image($photo_extension)) {
         throw new Exception("Formato immagine non valido");
       }
@@ -131,7 +138,7 @@ function post($mysqli){
     }
     */
     $ingredient_array = explode(",", $ingredienti);
-    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array));
+    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array, "notes" => $note, "original_name" => $original_photo_name));
     //create and write file with json data
     $description_path = "foto/" . $photo_base_name . ".txt";
     $description_file = fopen($description_path, "w");
@@ -141,8 +148,8 @@ function post($mysqli){
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
-    $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI) VALUES(?, ?, ?)");
-    $stmt->bind_param("iss", $photo_number, $photo_name, $ingredienti);
+    $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI, NOTE) VALUES(?, ?, ?, ?)");
+    $stmt->bind_param("isss", $photo_number, $photo_name, $ingredienti, $note);
     $stmt -> execute();
 
 
@@ -478,7 +485,11 @@ function post($mysqli){
                                 <div class="form-group">
                                         <label>Ingredienti</label>
                                         <textarea class="form-control" name="ingredienti" rows="3" placeholder="Per unificare gli stili dividere gli ingredienti con una virgola"></textarea>
-                                    </div>
+                                </div>
+                                <div class="form-group">
+                                        <label>Note</label>
+                                        <textarea class="form-control" name="note" rows="3" placeholder="Inserire qui eventuali note"></textarea>
+                                </div>
                             </div>
                         </div>
                         <br>
