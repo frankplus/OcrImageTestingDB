@@ -35,8 +35,18 @@ function getNumberTag($mysqli,$tagType){
 }
 
 //Restituisce tutti i tag del tipo specificato
-function getTagName($mysqli,$tagType){
-    $sql = "SELECT * FROM tag WHERE TIPO = '$tagType'";
+function getTagName($mysqli,$tagType, $idOriginale){
+    //$sql = "SELECT * FROM tag WHERE TIPO = '$tagType' ";
+    $sql = "
+    SELECT *
+    FROM tag
+    WHERE NOT EXISTS(
+        SELECT * FROM modifiche 
+        WHERE modifiche.TAGMODIFICA = tag.ID  AND modifiche.IDORIGINALE='$idOriginale')
+        AND tag.TIPO='$tagType'
+    ";
+
+
     $result = mysqli_query($mysqli, $sql);
     $tagarray = array();
     if ($result && mysqli_num_rows($result) > 0) {
@@ -98,26 +108,34 @@ function generateUrl($nomefile){
 function generaRadio($mysqli)
 {
     
-    $taglist=getTagName($mysqli,"M");
+    $taglist=getTagName($mysqli,"M",$_GET['id']);
     
-    
-    echo '<div class="row">
-    <div class="col-md-4">
-    <div class="form-group">
-    <label>Tag modifiche </label>';
-    foreach($taglist as $tag){
-        echo '
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" name="modifiche[]" value="'.$tag["ID"].'">'.$tag["NOME"].'
-                </label>
-            </div>
-        ';
+    if(count($taglist)==0)
+    {
+        echo "Sono già state inviate tutte le modifiche";
     }
-    echo '
-    </div>
-    </div>
-    </div>';
+    else
+    {
+        echo '<div class="row">
+        <div class="col-md-4">
+        <div class="form-group">
+        <label>Tag modifiche </label>';
+        foreach($taglist as $tag){
+            echo '
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="modifiche[]" value="'.$tag["ID"].'">'.$tag["NOME"].'
+                    </label>
+                </div>
+            ';
+        }
+        echo '
+        </div>
+        </div>
+        </div>';
+    }
+    
+    
 }
 
 
