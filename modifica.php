@@ -25,12 +25,16 @@ function getFotoFields($mysqli,$idfoto){
     $list = mysqli_fetch_array($result);
     return $list;
 }
+
+//Restituisce il numero di tag per il tipo specificato
 function getNumberTag($mysqli,$tagType){
     $sql = "SELECT COUNT(*) FROM tag WHERE TIPO = '$tagType'";
     $result = mysqli_query($mysqli, $sql);
     $taglist = mysqli_fetch_array($result);
     return $taglist[0];
 }
+
+//Restituisce tutti i tag del tipo specificato
 function getTagName($mysqli,$tagType){
     $sql = "SELECT * FROM tag WHERE TIPO = '$tagType'";
     $result = mysqli_query($mysqli, $sql);
@@ -93,7 +97,7 @@ function generateUrl($nomefile){
 
 function generaRadio($mysqli)
 {
-    $numTag=getNumberTag($mysqli,"M");
+    
     $taglist=getTagName($mysqli,"M");
     
     
@@ -161,7 +165,7 @@ function post($mysqli){
     } else {
       throw new Exception("File mancante.");
     }
-    
+
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
