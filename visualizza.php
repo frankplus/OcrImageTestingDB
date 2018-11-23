@@ -220,7 +220,8 @@
                                 '.printTagList(generateTagList($mysqli,$foto['ID'])).'
                             </ul>
                             <b>Ingredienti</b>: '.$foto['INGREDIENTI'].'<br>
-                            <b>Note</b>: '.$foto['NOTE'].'
+                            <b>Note</b>: '.$foto['NOTE'].'<br>
+                            <a href="modifica.php?id='.$foto['ID'].'" type="submit" class="btn btn-primary">Modifica</a> 
                         </div>
                     </div>
                 </div>';
