@@ -183,10 +183,10 @@ function post($mysqli){
 
 }
 
-function getTagGroups($mysqli) {
+function getTagGroups($mysqli, $tag_type) {
   $tags_group_array = array();
 
-  $sql = "SELECT GRUPPO from tag";
+  $sql = "SELECT GRUPPO from tag WHERE tag.TIPO = '$tag_type'";
   $result = mysqli_query($mysqli, $sql);
   if(mysqli_num_rows($result) > 0) {
     while($row = mysqli_fetch_assoc($result)) {
@@ -382,25 +382,32 @@ function getGroupNames($mysqli, $group) {
                                 $html = "";
 
                                 //get original photos tags group
-                                $tag_groups = getTagGroups($mysqli);
+                                $tag_groups = getTagGroups($mysqli, "originale");
+
                                 //counter keeps track of how many groups have been printed, every 3 groups write a new row
-                                $counter = 0;
+                                $current_column = 0;
 
                                 foreach($tag_groups as $group) {
 
-                                  $group = ucfirst($group);
-
-                                  //new row if 3° group
-                                  if($counter % 3 == 0) {
+                                  //open a row
+                                  if($current_column == 0) {
                                     $html .= "<div class='row'>";
                                   }
 
+                                  $current_column += 1;
+
+                                  $group = ucfirst($group);
+
+                                  //open md-4 and form group
                                   $html .= "<div class='col-md-4'><div class='form-group'>";
                                   $html .= "<label>$group</label>";
+
+
 
                                   //get tag group names
                                   $group_tag_names = getGroupNames($mysqli, strtolower($group));
                                   $is_checked = false;
+
                                   foreach ($group_tag_names as $name) {
                                     $group = strtolower($group);
                                     //create radio button for each tag
@@ -412,7 +419,6 @@ function getGroupNames($mysqli, $group) {
                                     } else {
                                       $html .= "<input type='radio' name='$group' value='$name'>";
                                     }
-
 
                                     //make 1st character uppercase
                                     $name = ucfirst($name);
@@ -429,13 +435,16 @@ function getGroupNames($mysqli, $group) {
 
                                   //close class col-md-4 and class form-group
                                   $html .= "</div></div>";
-                                  //close row if 3° group
-                                  if($counter % 3 == 0) {
+                                  //close row if 3° column
+                                  if($current_column == 3) {
                                     $html .= "</div>";
+                                    $current_column = 0;
                                   }
-                                  $counter += 1;
                                 }
-
+                                //if a row isnt closed then close it
+                                if($current_column > 0) {
+                                  $html .= "</div>";
+                                }
                                 echo $html;
 
                               ?>
