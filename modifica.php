@@ -222,9 +222,15 @@ function post($mysqli){
       throw new Exception("Descrizione foto originale non trovata");
     }
     $original_photo_description_json = json_decode($original_photo_description_string, true); //true because i want an associative array
-    //add alteration
+    //add alteration - if alterations field doesn't exist then add it
+    if($original_photo_description_json["alterations"] != null) {
+      array_push($original_photo_description_json["alterations"], $photo_base_name);
+    }
+    else {
+      //add alteration field
+      $original_photo_description_json["alterations"] = array($photo_base_name);
+    }
 
-    array_push($original_photo_description_json["alterations"], $photo_base_name);
     //save changes
     $original_photo_description_string = json_encode($original_photo_description_json);
     $original_photo_description_file = fopen($original_photo_description_path, "w");
