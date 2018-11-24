@@ -5,8 +5,9 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 if (!isset( $_SESSION['user'])  || !isset( $_GET['id']) ) {
-  header("location: /index.php");
+    header("location: /index.php");
 }
+
 
 $photo_base_name = "foto";
 include 'database_info.php';
@@ -17,6 +18,11 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$riga=getFotoFields($mysqli,$_GET['id']);
+if($riga==null)
+{
+    header("location: /visualizza.php?errore=Id non esistente");
+}
 
 //Ritorna la riga del database di una foto
 function getFotoFields($mysqli,$idfoto){
@@ -36,16 +42,16 @@ function getNumberTag($mysqli,$tagType){
 
 //Restituisce tutti i tag del tipo specificato
 function getTagName($mysqli,$tagType, $idOriginale){
-    //$sql = "SELECT * FROM tag WHERE TIPO = '$tagType' ";
+
     $sql = "
     SELECT *
     FROM tag
     WHERE NOT EXISTS(
-        SELECT * FROM modifiche 
-        WHERE modifiche.TAGMODIFICA = tag.ID  AND modifiche.IDORIGINALE='$idOriginale')
+        SELECT fototag.IDTAG FROM fototag 
+        INNER JOIN modifiche on modifiche.IDMODIFICATA = fototag.IDFOTO
+        WHERE modifiche.IDMODIFICATA = fototag.IDFOTO AND modifiche.IDORIGINALE='$idOriginale' AND tag.ID=fototag.IDTAG)
         AND tag.TIPO='$tagType'
     ";
-
 
     $result = mysqli_query($mysqli, $sql);
     $tagarray = array();
@@ -108,7 +114,7 @@ function generateUrl($nomefile){
 function generaRadio($mysqli)
 {
     
-    $taglist=getTagName($mysqli,"M",$_GET['id']);
+    $taglist=getTagName($mysqli,"modifica",$_GET['id']);
     
     if(count($taglist)==0)
     {
@@ -116,10 +122,8 @@ function generaRadio($mysqli)
     }
     else
     {
-        echo '<div class="row">
-        <div class="col-md-4">
-        <div class="form-group">
-        <label>Tag modifiche </label>';
+        echo '<div class="form-group">
+        <label>Tag modifiche non utilizzate su questa foto</label>';
         foreach($taglist as $tag){
             echo '
                 <div class="checkbox">
@@ -129,10 +133,7 @@ function generaRadio($mysqli)
                 </div>
             ';
         }
-        echo '
-        </div>
-        </div>
-        </div>';
+        echo '</div>';
     }
     
     
@@ -144,9 +145,9 @@ if(isset($_POST["modifiche"]))
     
     try {
         post($mysqli);
-        header("location: /inserimento.php?inserita");
+        header("location: /visualizza.php?inserita");
     } catch (Exception $e) {
-      header("location: /inserimento.php?errore=". $e->getMessage());
+      header("location: /visualizza.php?errore=". $e->getMessage());
     }
     
     
@@ -184,18 +185,37 @@ function post($mysqli){
       throw new Exception("File mancante.");
     }
 
+
+
+
+    //JSON DA INSERIMENTO
+    /*$ingredient_array = explode(",", $ingredienti);
+    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array, "notes" => $note, "original_name" => $original_photo_name));
+    //create and write file with json data
+    $description_path = "foto/" . $photo_base_name . ".txt";
+    $description_file = fopen($description_path, "w");
+    fwrite($description_file, $description_json);
+    fclose($description_file);
+    */
+
+
+
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
     $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI, NOTE) VALUES(?, ?, ?, ?)");
     $val="";
-    $stmt->bind_param("isss", $photo_number, $photo_name, $val, $val);
+    $stmt->bind_param("isss", $photo_number, $photo_name, $val, $note);
+    $stmt -> execute();
+
+    $stmt = $mysqli -> prepare("INSERT INTO modifiche (IDORIGINALE, IDMODIFICATA) VALUES(?, ?)");
+    $stmt->bind_param("ii", $idFotoOrginale, $photo_number);
     $stmt -> execute();
 
     foreach($modifiche as $modifica) {
     {
-        $stmt = $mysqli -> prepare("INSERT INTO modifiche (IDORIGINALE, IDMODIFICATA, TAGMODIFICA, NOTE) VALUES(?, ?, ?, ?)");
-        $stmt->bind_param("iiis", $idFotoOrginale, $photo_number, $modifica, $note);
+        $stmt = $mysqli -> prepare("INSERT INTO fototag (IDFOTO, IDTAG) VALUES(?, ?)");
+        $stmt->bind_param("ii", $photo_number, $modifica);
         $stmt -> execute();
     }
     
@@ -370,12 +390,11 @@ function is_image($photo_extension) {
                                 <img id="imgPreview" class="img-responsive" src="defaultIMG.jpg" style="height:auto; max-width:100%" />
                             </div>
                             <div class="col-md-4">
-                                <div class="row">
+                  
                                     <?php
                                         generaRadio($mysqli);
                                     ?>
-                                    
-                                </div>
+                         
                                 
                             </div>
                             <div class="col-md-4">

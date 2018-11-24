@@ -8,7 +8,8 @@
     $immaginiPerPagina="2";
     if(!isset($_GET["pag"]))
     {
-        header("location: /visualizza.php?pag=0");
+        $nuovaQuery = $_SERVER['QUERY_STRING'];
+        header("location: /visualizza.php?$nuovaQuery&pag=0");
     }
 
 
@@ -305,6 +306,22 @@
             </div>
 
             <div class="row">
+            <?php
+                if(isset($_GET["inserita"]))
+                {
+                    echo '<div class="alert alert-success alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            Foto caricata.
+                        </div>';
+                }
+                if(isset($_GET["errore"]))
+                {
+                    echo '<div class="alert alert-danger alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'
+                            . 'Errore: ' . $_GET['errore']
+                            .'</div>';
+                }
+            ?>
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
