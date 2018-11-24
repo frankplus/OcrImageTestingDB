@@ -116,10 +116,8 @@ function generaRadio($mysqli)
     }
     else
     {
-        echo '<div class="row">
-        <div class="col-md-4">
-        <div class="form-group">
-        <label>Tag modifiche </label>';
+        echo '<div class="form-group">
+        <label>Tag modifiche non utilizzate su questa foto</label>';
         foreach($taglist as $tag){
             echo '
                 <div class="checkbox">
@@ -129,10 +127,7 @@ function generaRadio($mysqli)
                 </div>
             ';
         }
-        echo '
-        </div>
-        </div>
-        </div>';
+        echo '</div>';
     }
     
     
@@ -198,7 +193,7 @@ function post($mysqli){
     */
 
 
-    
+
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
@@ -389,12 +384,11 @@ function is_image($photo_extension) {
                                 <img id="imgPreview" class="img-responsive" src="defaultIMG.jpg" style="height:auto; max-width:100%" />
                             </div>
                             <div class="col-md-4">
-                                <div class="row">
+                  
                                     <?php
                                         generaRadio($mysqli);
                                     ?>
-                                    
-                                </div>
+                         
                                 
                             </div>
                             <div class="col-md-4">
