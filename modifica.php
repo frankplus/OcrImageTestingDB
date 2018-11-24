@@ -9,7 +9,7 @@ if (!isset( $_SESSION['user'])  || !isset( $_GET['id']) ) {
 }
 
 
-$photo_base_name = "foto";
+$photo_base_name = "alteration";
 include 'database_info.php';
 //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
 $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
