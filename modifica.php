@@ -41,13 +41,13 @@ function getNumberTag($mysqli,$tagType){
 }
 
 //Restituisce tutti i tag del tipo specificato
-function getTagName($mysqli,$tagType, $idOriginale){
+function getTagsName($mysqli,$tagType, $idOriginale){
 
     $sql = "
     SELECT *
     FROM tag
     WHERE NOT EXISTS(
-        SELECT fototag.IDTAG FROM fototag 
+        SELECT fototag.IDTAG FROM fototag
         INNER JOIN modifiche on modifiche.IDMODIFICATA = fototag.IDFOTO
         WHERE modifiche.IDMODIFICATA = fototag.IDFOTO AND modifiche.IDORIGINALE='$idOriginale' AND tag.ID=fototag.IDTAG)
         AND tag.TIPO='$tagType'
@@ -60,7 +60,14 @@ function getTagName($mysqli,$tagType, $idOriginale){
         mysqli_free_result($result);
     }
     return $tagarray;
-    
+
+}
+//restituisce il nome di un tag
+function getTagName($mysqli, $tagId) {
+  $sql = "SELECT NOME from tag WHERE ID = '$tagId'";
+  $result = mysqli_query($mysqli, $sql);
+  return mysqli_fetch_array($result, MYSQLI_ASSOC)['NOME'];
+
 }
 
 //generazione dell'url dove reperire i file delle foto
@@ -74,7 +81,7 @@ function generateUrl($nomefile){
 /*function generaRadio($mysqli)
 {
     echo $numTag=getNumberTag($mysqli,"M");
-    
+
     echo '<div class="row">';
     //colonna tag parte da 0
     $currentCollumn=0;
@@ -113,9 +120,9 @@ function generateUrl($nomefile){
 
 function generaRadio($mysqli)
 {
-    
-    $taglist=getTagName($mysqli,"modifica",$_GET['id']);
-    
+
+    $taglist=getTagsName($mysqli,"modifica",$_GET['id']);
+
     if(count($taglist)==0)
     {
         echo "Sono già state inviate tutte le modifiche";
@@ -135,22 +142,22 @@ function generaRadio($mysqli)
         }
         echo '</div>';
     }
-    
-    
+
+
 }
 
 
 if(isset($_POST["modifiche"]))
 {
-    
+
     try {
         post($mysqli);
         header("location: /visualizza.php?inserita");
     } catch (Exception $e) {
       header("location: /visualizza.php?errore=". $e->getMessage());
     }
-    
-    
+
+
 }
 function post($mysqli){
     global $photo_base_name;
@@ -188,16 +195,41 @@ function post($mysqli){
 
 
 
-    //JSON DA INSERIMENTO
-    /*$ingredient_array = explode(",", $ingredienti);
-    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array, "notes" => $note, "original_name" => $original_photo_name));
+
+
+    $original_photo_name = "foto" . $idFotoOrginale;
+
+    //salvo descrizione in formato JSON della foto modificata (alterationID.txt) e aggiorno il file descrittivo della foto originale, aggiungendo il nome di questa alterazione
+    //costruisco array con i nomi dei tag di modifica
+    $alteration_tags_array = array();
+    foreach($modifiche as $modifica) {
+      array_push($alteration_tags_array, getTagName($mysqli, $modifica));
+    }
+
+    //in ordine nel JSON: nome foto originale, tags, note, nome originale
+    $description_json = json_encode(array("original_photo" => $original_photo_name, "tags" => $alteration_tags_array, "notes" => $note));
     //create and write file with json data
     $description_path = "foto/" . $photo_base_name . ".txt";
     $description_file = fopen($description_path, "w");
     fwrite($description_file, $description_json);
     fclose($description_file);
-    */
 
+    //update original photo description adding alteration
+    //read description and decode json
+    $original_photo_description_path = "foto/" . $original_photo_name . ".txt";
+    $original_photo_description_string = file_get_contents($original_photo_description_path, true);
+    if(!$original_photo_description_string) {
+      throw new Exception("Descrizione foto originale non trovata");
+    }
+    $original_photo_description_json = json_decode($original_photo_description_string, true); //true because i want an associative array
+    //add alteration
+
+    array_push($original_photo_description_json["alterations"], $photo_base_name);
+    //save changes
+    $original_photo_description_string = json_encode($original_photo_description_json);
+    $original_photo_description_file = fopen($original_photo_description_path, "w");
+    fwrite($original_photo_description_file, $original_photo_description_string);
+    fclose($original_photo_description_file);
 
 
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
@@ -218,7 +250,7 @@ function post($mysqli){
         $stmt->bind_param("ii", $photo_number, $modifica);
         $stmt -> execute();
     }
-    
+
     }
 
     //close connection
@@ -242,7 +274,7 @@ function is_image($photo_extension) {
     }
     return true;
   }
-  
+
 
 ?>
 <!DOCTYPE html>
@@ -390,12 +422,12 @@ function is_image($photo_extension) {
                                 <img id="imgPreview" class="img-responsive" src="defaultIMG.jpg" style="height:auto; max-width:100%" />
                             </div>
                             <div class="col-md-4">
-                  
+
                                     <?php
                                         generaRadio($mysqli);
                                     ?>
-                         
-                                
+
+
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">

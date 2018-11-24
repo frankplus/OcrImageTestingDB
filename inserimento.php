@@ -31,7 +31,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 function printNumFoto($mysqli)
 {
-    $sql = "SELECT COUNT(*) FROM foto";
+  //conto solo le foto originali
+    $sql = "SELECT COUNT(*) FROM foto WHERE foto.INGREDIENTI = ''";
     $result = mysqli_query($mysqli, $sql);
     $rows = mysqli_fetch_row($result);
     echo $rows[0];
@@ -51,6 +52,7 @@ function get_tags_id($mysqli, $attr_array) {
           }
       }
   }
+
   return $tags_id_array;
 }
 
@@ -77,11 +79,11 @@ function post($mysqli){
     global $photo_base_name;
     $inclinazione = $_POST['inclinazione'];
     $angolazione = $_POST['angolazione'];
-    $testoPresente = $_POST['testoPresente'];
+    $testoPresente = $_POST['testo'];
     $luce = $_POST['luce'];
-    $etichettaPiana = $_POST['etichettaPiana'];
-    $caratteriDanneggiati = $_POST['caratteriDanneggiati'];
-    $immagineNitida = $_POST['immagineNitida'];
+    $etichettaPiana = $_POST['etichetta'];
+    $caratteriDanneggiati = $_POST['caratteri'];
+    $immagineNitida = $_POST['immagine'];
     $mossa = $_POST['mossa'];
     $risoluzione= $_POST['risoluzione'];
     $note = $_POST['note'];
@@ -135,10 +137,11 @@ function post($mysqli){
     {
       "ingredients": ["ing1,", "ing2"],
       "tags": ["tag1", "tag2"]
+      ..note e original name
     }
     */
     $ingredient_array = explode(",", $ingredienti);
-    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array, "notes" => $note, "original_name" => $original_photo_name));
+    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array,"alterations" => array(), "notes" => $note, "original_name" => $original_photo_name));
     //create and write file with json data
     $description_path = "foto/" . $photo_base_name . ".txt";
     $description_file = fopen($description_path, "w");
@@ -153,9 +156,9 @@ function post($mysqli){
     $stmt -> execute();
 
 
-
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
     foreach($tags_id_array as &$tag_id) {
+
       //senza chiavi esterne è necessario controllare non vi siano righe uguali
       $stmt = $mysqli -> prepare("SELECT * FROM fototag WHERE IDFOTO = ? AND IDTAG = ?");
       $stmt -> bind_param("ii", $photo_number, $tag_id);
@@ -164,7 +167,9 @@ function post($mysqli){
       $stmt->fetch();
       $stmt->close();
       //se non vi sono duplicati associo foto al tag
+
       if($id == NULL) {
+
         $stmt = $mysqli -> prepare("INSERT INTO fototag (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
         $stmt -> bind_param("ii", $photo_number, $tag_id);
         $stmt -> execute();
@@ -176,6 +181,35 @@ function post($mysqli){
     //close connection
     mysqli_close($mysqli);
 
+}
+
+function getTagGroups($mysqli) {
+  $tags_group_array = array();
+
+  $sql = "SELECT GRUPPO from tag";
+  $result = mysqli_query($mysqli, $sql);
+  if(mysqli_num_rows($result) > 0) {
+    while($row = mysqli_fetch_assoc($result)) {
+      if(!in_array($row["GRUPPO"],$tags_group_array)) {
+        array_push($tags_group_array, $row["GRUPPO"]);
+      }
+    }
+  }
+  return $tags_group_array;
+}
+
+function getGroupNames($mysqli, $group) {
+  $tag_group_names = array();
+
+  $sql = "SELECT NOME from tag where GRUPPO = '$group'";
+  $result = mysqli_query($mysqli, $sql);
+  if(mysqli_num_rows($result) > 0) {
+    while($row = mysqli_fetch_assoc($result)) {
+      array_push($tag_group_names, $row["NOME"]);
+    }
+  }
+
+  return $tag_group_names;
 }
 
 
@@ -339,149 +373,75 @@ function post($mysqli){
                             <div class="col-md-4">
                                 <img id="imgPreview" class="img-responsive" src="defaultIMG.jpg" style="height:auto; max-width:100%" />
                             </div>
-                            <div class="col-md-8">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Inclinazione</label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="inclinazione" value="inclinata" >Inclinata
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="inclinazione" value="non_inclinata" checked="">Non inclinata
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Angolazione</label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="angolazione" value="angolata">Angolata
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="angolazione" value="non_angolata" checked="">Non angolata
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Testo</label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="testoPresente" value="testo_presente" checked="">Presente
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="testoPresente" value="testo_non_presente">Non presente
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Luce</label>
-                                            <select name = "luce" class="form-control">
-                                                <option value="poca_luce">Poca luce</option>
-                                                <option value="luce_ottimale">Luce ottimale</option>
-                                                <option value="troppa_luce">Troppa luce</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Etichetta</label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="etichettaPiana" value="etichetta_piana" checked="">Piana
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="etichettaPiana" value="etichetta_non_piana">Non piana
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Caratteri </label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="caratteriDanneggiati" value="caratteri_danneggiati">Opachi/Danneggiati
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="caratteriDanneggiati" value="caratteri_non_danneggiati" checked="">Nitidi
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Immagine </label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="immagineNitida" value="nitida" checked="">Nitida
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="immagineNitida" value="sfuocata">Sfuocata
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Mossa</label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="mossa" value="foto_mossa">Foto mossa
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="mossa" value="foto_non_mossa" checked="">Foto non mossa
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Risoluzione</label>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="risoluzione" value="alta_risoluzione" checked="">Alta risoluzione
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="risoluzione" value="media_risoluzione">Media risoluzione
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" name="risoluzione" value="bassa_risoluzione">Bassa risoluzione
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+
+                            <div class="col-md-8">
+
+
+                              <?php
+                                $html = "";
+
+                                //get original photos tags group
+                                $tag_groups = getTagGroups($mysqli);
+                                //counter keeps track of how many groups have been printed, every 3 groups write a new row
+                                $counter = 0;
+
+                                foreach($tag_groups as $group) {
+
+                                  $group = ucfirst($group);
+
+                                  //new row if 3° group
+                                  if($counter % 3 == 0) {
+                                    $html .= "<div class='row'>";
+                                  }
+
+                                  $html .= "<div class='col-md-4'><div class='form-group'>";
+                                  $html .= "<label>$group</label>";
+
+                                  //get tag group names
+                                  $group_tag_names = getGroupNames($mysqli, strtolower($group));
+                                  $is_checked = false;
+                                  foreach ($group_tag_names as $name) {
+                                    $group = strtolower($group);
+                                    //create radio button for each tag
+                                    $html .= "<div class='radio'><label>";
+                                    //<input type="radio" name="inclinazione" value="inclinata" >Inclinata
+                                    if(!$is_checked) {
+                                      $html .= "<input type='radio' name='$group' value='$name' checked=''>";
+                                      $is_checked = true;
+                                    } else {
+                                      $html .= "<input type='radio' name='$group' value='$name'>";
+                                    }
+
+
+                                    //make 1st character uppercase
+                                    $name = ucfirst($name);
+
+                                    //replace '_' separator with space
+                                    $tag_name = str_replace("_", " ", $name);
+                                    $html .= $tag_name;
+
+                                    //close radio button
+                                    $html .= "</label></div>";
+
+                                  }
+
+
+                                  //close class col-md-4 and class form-group
+                                  $html .= "</div></div>";
+                                  //close row if 3° group
+                                  if($counter % 3 == 0) {
+                                    $html .= "</div>";
+                                  }
+                                  $counter += 1;
+                                }
+
+                                echo $html;
+
+                              ?>
+
+
+
                                 <div class="form-group">
                                         <label>Ingredienti</label>
                                         <textarea class="form-control" name="ingredienti" rows="3" placeholder="Per unificare gli stili dividere gli ingredienti con una virgola"></textarea>
@@ -490,8 +450,11 @@ function post($mysqli){
                                         <label>Note</label>
                                         <textarea class="form-control" name="note" rows="3" placeholder="Inserire qui eventuali note"></textarea>
                                 </div>
+
                             </div>
+
                         </div>
+
                         <br>
 
 
