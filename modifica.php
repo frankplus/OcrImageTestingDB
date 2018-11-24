@@ -5,8 +5,9 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 if (!isset( $_SESSION['user'])  || !isset( $_GET['id']) ) {
-  header("location: /index.php");
+    header("location: /index.php");
 }
+
 
 $photo_base_name = "foto";
 include 'database_info.php';
@@ -17,6 +18,11 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$riga=getFotoFields($mysqli,$_GET['id']);
+if($riga==null)
+{
+    header("location: /visualizza.php?errore=Id non esistente");
+}
 
 //Ritorna la riga del database di una foto
 function getFotoFields($mysqli,$idfoto){
@@ -139,9 +145,9 @@ if(isset($_POST["modifiche"]))
     
     try {
         post($mysqli);
-        header("location: /inserimento.php?inserita");
+        header("location: /visualizza.php?inserita");
     } catch (Exception $e) {
-      header("location: /inserimento.php?errore=". $e->getMessage());
+      header("location: /visualizza.php?errore=". $e->getMessage());
     }
     
     
