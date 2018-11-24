@@ -32,7 +32,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 function printNumFoto($mysqli)
 {
   //conto solo le foto originali
-    $sql = "SELECT COUNT(*) FROM foto WHERE foto.INGREDIENTI = ''";
+    $sql = "SELECT COUNT(*) FROM foto WHERE foto.INGREDIENTI != ''";
     $result = mysqli_query($mysqli, $sql);
     $rows = mysqli_fetch_row($result);
     echo $rows[0];
