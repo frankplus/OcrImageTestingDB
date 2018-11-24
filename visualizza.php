@@ -118,7 +118,7 @@
         $tags=generaStringaTag();
         $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI, foto.NOTE FROM foto
             INNER JOIN fototag ON foto.ID = fototag.IDFOTO
-            WHERE IDTAG IN (
+            WHERE foto.INGREDIENTI != '' AND IDTAG IN (
                 SELECT ID 
                 FROM tag 
                 WHERE NOME IN ($tags) 
@@ -154,7 +154,7 @@
         //creazione della query
         $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI, foto.NOTE  FROM foto
             INNER JOIN fototag ON foto.ID = fototag.IDFOTO
-            WHERE IDTAG IN (
+            WHERE foto.INGREDIENTI != '' AND IDTAG IN (
                 SELECT ID 
                 FROM tag 
                 WHERE NOME IN ($tags) 
@@ -190,6 +190,42 @@
         return $htmltaglist;
     }
 
+    //selezione delle foto modificate e i loro tag di modifica
+    function generateEditedPhotos($mysqli, $idfotoorig){
+        $sql = "SELECT foto.NOME, tag.NOME AS TAGNOME
+            FROM tag
+            INNER JOIN fototag ON tag.ID = fototag.IDTAG
+            INNER JOIN modifiche ON fototag.IDFOTO = modifiche.IDMODIFICATA
+            INNER JOIN foto ON modifiche.IDMODIFICATA = foto.ID
+            WHERE modifiche.IDORIGINALE = $idfotoorig AND tag.TIPO='modifica'";
+        $result = mysqli_query($mysqli, $sql);
+        $photolist = mysqli_fetch_all($result,MYSQLI_ASSOC);
+        mysqli_free_result($result);
+
+        $assoc = array();
+        foreach($photolist as $photo){
+            if(!array_key_exists($photo['NOME'], $assoc)) {
+                $assoc[$photo['NOME']] = array();
+            }
+            array_push($assoc[$photo['NOME']], $photo['TAGNOME']);
+        }
+        return $assoc;
+    }
+
+    //stampa della lista delle foto modificate
+    function printEditedPhotos($modphotolist){
+        $html = '';
+        foreach($modphotolist as $fotonome => $array){
+            $html .= '<li>';
+            $html .= '<a href="'.generateUrl($fotonome).'">'. $fotonome . '</a>: ';
+            foreach($array as $tagmodifica){
+                $html .= $tagmodifica . ' ';
+            }
+            $html .= '</li>';
+        }
+        return $html;
+    }
+
     //generazione dell'url dove reperire i file delle foto
     function generateUrl($nomefile){
         return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
@@ -215,13 +251,16 @@
                         <div class="panel-body" style="font-size: 17px;">
                             <img src="'.generateUrl($foto['NOME']).'"
                                 style="width: 100%; height: auto;"></br></br>
-                            <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
                             <b>Tag</b>:
                             <ul>
                                 '.printTagList(generateTagList($mysqli,$foto['ID'])).'
                             </ul>
                             <b>Ingredienti</b>: '.$foto['INGREDIENTI'].'<br>
                             <b>Note</b>: '.$foto['NOTE'].'<br>
+                            <b>Modifiche:</b><br>
+                            <ul>
+                                '.printEditedPhotos(generateEditedPhotos($mysqli, $foto['ID'])).'
+                            </ul>
                             <a href="modifica.php?id='.$foto['ID'].'" type="submit" class="btn btn-primary">Modifica</a> 
                         </div>
                     </div>
