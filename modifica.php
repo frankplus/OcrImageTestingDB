@@ -36,16 +36,16 @@ function getNumberTag($mysqli,$tagType){
 
 //Restituisce tutti i tag del tipo specificato
 function getTagName($mysqli,$tagType, $idOriginale){
-    //$sql = "SELECT * FROM tag WHERE TIPO = '$tagType' ";
+
     $sql = "
     SELECT *
     FROM tag
     WHERE NOT EXISTS(
-        SELECT * FROM modifiche 
-        WHERE modifiche.TAGMODIFICA = tag.ID  AND modifiche.IDORIGINALE='$idOriginale')
+        SELECT fototag.IDTAG FROM fototag 
+        INNER JOIN modifiche on modifiche.IDMODIFICATA = fototag.IDFOTO
+        WHERE modifiche.IDMODIFICATA = fototag.IDFOTO AND modifiche.IDORIGINALE='$idOriginale' AND tag.ID=fototag.IDTAG)
         AND tag.TIPO='$tagType'
     ";
-
 
     $result = mysqli_query($mysqli, $sql);
     $tagarray = array();
@@ -108,7 +108,7 @@ function generateUrl($nomefile){
 function generaRadio($mysqli)
 {
     
-    $taglist=getTagName($mysqli,"M",$_GET['id']);
+    $taglist=getTagName($mysqli,"modifica",$_GET['id']);
     
     if(count($taglist)==0)
     {
@@ -184,18 +184,37 @@ function post($mysqli){
       throw new Exception("File mancante.");
     }
 
+
+
+
+    //JSON DA INSERIMENTO
+    /*$ingredient_array = explode(",", $ingredienti);
+    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array, "notes" => $note, "original_name" => $original_photo_name));
+    //create and write file with json data
+    $description_path = "foto/" . $photo_base_name . ".txt";
+    $description_file = fopen($description_path, "w");
+    fwrite($description_file, $description_json);
+    fclose($description_file);
+    */
+
+
+    
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
     $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI, NOTE) VALUES(?, ?, ?, ?)");
     $val="";
-    $stmt->bind_param("isss", $photo_number, $photo_name, $val, $val);
+    $stmt->bind_param("isss", $photo_number, $photo_name, $val, $note);
+    $stmt -> execute();
+
+    $stmt = $mysqli -> prepare("INSERT INTO modifiche (IDORIGINALE, IDMODIFICATA) VALUES(?, ?)");
+    $stmt->bind_param("ii", $idFotoOrginale, $photo_number);
     $stmt -> execute();
 
     foreach($modifiche as $modifica) {
     {
-        $stmt = $mysqli -> prepare("INSERT INTO modifiche (IDORIGINALE, IDMODIFICATA, TAGMODIFICA, NOTE) VALUES(?, ?, ?, ?)");
-        $stmt->bind_param("iiis", $idFotoOrginale, $photo_number, $modifica, $note);
+        $stmt = $mysqli -> prepare("INSERT INTO fototag (IDFOTO, IDTAG) VALUES(?, ?)");
+        $stmt->bind_param("ii", $photo_number, $modifica);
         $stmt -> execute();
     }
     
