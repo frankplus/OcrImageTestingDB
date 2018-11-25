@@ -193,10 +193,52 @@ function post($mysqli){
     }
 
 
+    //add alteration data to original photo description
+    /*
+    e.g. of final photo description:
+    {
+    	"ingredients": "ing1,ing2",
+    	"tags": ["non_inclinata", "non_angolata", "testo_non_presente", "luce_ottimale", "etichetta_non_piana", "caratteri_danneggiati", "nitida", "foto_mossa", "alta_risoluzione"],
+    	"notes": "nota",
+    	"original_name": "testFoto.jpeg",
+    	"alterations": {
+    		"alteration2": "{\"tags\":[\"ritagliata\",\"raddrizzata\"],\"notes\":\"test note\"}",
+    		"alteration3": "{\"tags\":[\"ritagliata\",\"raddrizzata\"],\"notes\":\"test note\"}"
+    	 }
+    }
+    */
+    $original_photo_name = "foto" . $idFotoOrginale;
 
+    //read description and decode json
+    $original_photo_description_path = "foto/" . $original_photo_name . ".txt";
+    $original_photo_description_string = file_get_contents($original_photo_description_path, true);
+    if(!$original_photo_description_string) {
+      throw new Exception("Descrizione foto originale non trovata");
+    }
+    $original_json = json_decode($original_photo_description_string, true); //true because i want an associative array
 
+    //e.g. of alteration description: {"tags":["ritagliata","raddrizzata"],"notes":"test note"}
+    //build alteration json
+    $alteration_tags_array = array();
+    foreach($modifiche as $modifica) {
+      array_push($alteration_tags_array, getTagName($mysqli, $modifica));
+    }
+    $alteration_description_json = json_encode(array("tags" => $alteration_tags_array, "notes" => $note));
 
+    //if original photo has no alteration then create a new object with this alteration, otherwise add this alteration
+    if($original_json["alterations"] != null) {
+           $original_json["alterations"] += array($photo_base_name => $alteration_description_json);
+       } else {
+           $original_json["alterations"] = array($photo_base_name => $alteration_description_json);
+    }
 
+    //save changes to fotoID.txt
+    $original_photo_description_string = json_encode($original_json);
+    $original_photo_description_file = fopen($original_photo_description_path, "w");
+    fwrite($original_photo_description_file, $original_photo_description_string);
+    fclose($original_photo_description_file);
+
+    /*
     $original_photo_name = "foto" . $idFotoOrginale;
 
     //salvo descrizione in formato JSON della foto modificata (alterationID.txt) e aggiorno il file descrittivo della foto originale, aggiungendo il nome di questa alterazione
@@ -236,7 +278,7 @@ function post($mysqli){
     $original_photo_description_file = fopen($original_photo_description_path, "w");
     fwrite($original_photo_description_file, $original_photo_description_string);
     fclose($original_photo_description_file);
-
+    */
 
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
