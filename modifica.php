@@ -227,9 +227,9 @@ function post($mysqli){
 
     //if original photo has no alteration then create a new object with this alteration, otherwise add this alteration
     if($original_json["alterations"] != null) {
-           $original_json["alterations"] += array($photo_base_name => $alteration_description_json);
+           $original_json["alterations"] += array($photo_base_name . '.' . $photo_extension => $alteration_description_json);
        } else {
-           $original_json["alterations"] = array($photo_base_name => $alteration_description_json);
+           $original_json["alterations"] = array($photo_base_name . '.' . $photo_extension => $alteration_description_json);
     }
 
     //save changes to fotoID.txt
