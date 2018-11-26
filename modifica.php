@@ -202,8 +202,8 @@ function post($mysqli){
     	"notes": "nota",
     	"original_name": "testFoto.jpeg",
     	"alterations": {
-    		"alteration2": "{\"tags\":[\"ritagliata\",\"raddrizzata\"],\"notes\":\"test note\"}",
-    		"alteration3": "{\"tags\":[\"ritagliata\",\"raddrizzata\"],\"notes\":\"test note\"}"
+    		"alteration2": {\"tags\":[\"ritagliata\",\"raddrizzata\"],\"notes\":\"test note\"},
+    		"alteration3": {\"tags\":[\"ritagliata\",\"raddrizzata\"],\"notes\":\"test note\"}
     	 }
     }
     */
@@ -223,14 +223,21 @@ function post($mysqli){
     foreach($modifiche as $modifica) {
       array_push($alteration_tags_array, getTagName($mysqli, $modifica));
     }
-    $alteration_description_json = json_encode(array("tags" => $alteration_tags_array, "notes" => $note));
+    $alteration_description_json = array("tags" => $alteration_tags_array, "notes" => $note);
+    
+    $alteration_name = $photo_base_name . '.' . $photo_extension;
+
+    //set new JSON obj
+    $original_json["alterations"][$alteration_name] = $alteration_description_json;
 
     //if original photo has no alteration then create a new object with this alteration, otherwise add this alteration
+    /*
     if($original_json["alterations"] != null) {
            $original_json["alterations"] += array($photo_base_name . '.' . $photo_extension => $alteration_description_json);
        } else {
            $original_json["alterations"] = array($photo_base_name . '.' . $photo_extension => $alteration_description_json);
     }
+    */
 
     //save changes to fotoID.txt
     $original_photo_description_string = json_encode($original_json);

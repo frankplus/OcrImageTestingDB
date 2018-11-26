@@ -141,7 +141,7 @@ function post($mysqli){
     }
     */
     $ingredient_array = explode(",", $ingredienti);
-    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array,"alterations" => array(), "notes" => $note, "original_name" => $original_photo_name));
+    $description_json = json_encode(array("ingredients" => $ingredienti, "tags" => $attr_array, "notes" => $note, "original_name" => $original_photo_name));
     //create and write file with json data
     $description_path = "foto/" . $photo_base_name . ".txt";
     $description_file = fopen($description_path, "w");
