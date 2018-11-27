@@ -11,13 +11,13 @@ if (!isset( $_SESSION['user'] ) ) {
 
 $photo_base_name = "foto";
 include 'database_info.php';
-//$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
+
+//connect to database
 $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
 // Check connection
 if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
@@ -28,16 +28,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 }
 
-
-function printNumFoto($mysqli)
+//get the number of original photos in the database
+function get_current_photo_id($mysqli)
 {
-  //conto solo le foto originali
+    //photo alterations have foto.INGREDIENTI set to empty string
     $sql = "SELECT COUNT(*) FROM foto WHERE foto.INGREDIENTI != ''";
     $result = mysqli_query($mysqli, $sql);
     $rows = mysqli_fetch_row($result);
     echo $rows[0];
 }
 
+//given an array of tag names, return an array containing the tags ID
 function get_tags_id($mysqli, $attr_array) {
   $tags_id_array = array();
   $sql = "SELECT * FROM tag";
@@ -56,15 +57,16 @@ function get_tags_id($mysqli, $attr_array) {
   return $tags_id_array;
 }
 
-function get_photo_number($mysqli) {
-  $photo_number = 0;
+//get a valid ID for a new photo
+function get_valid_photo_id($mysqli) {
+  $current_photo_id = 0;
   $sql = "SELECT MAX(ID) FROM foto";
   $result = mysqli_query($mysqli, $sql);
   if($result != NULL) {
     $row = $result->fetch_assoc();
-    $photo_number =  ((int)$row["MAX(ID)"] + 1);
+    $current_photo_id =  ((int)$row["MAX(ID)"] + 1);
   }
-  return $photo_number;
+  return $current_photo_id;
 }
 function is_image($photo_extension) {
   $expensions= array("jpeg","jpg","png");
@@ -74,8 +76,9 @@ function is_image($photo_extension) {
   return true;
 }
 
-
+//save data to database, insert image and description to folder /foto/
 function post($mysqli){
+
     global $photo_base_name;
     $inclinazione = $_POST['inclinazione'];
     $angolazione = $_POST['angolazione'];
@@ -99,15 +102,13 @@ function post($mysqli){
     $attr_array = array($inclinazione, $angolazione, $testoPresente, $luce, $etichettaPiana, $caratteriDanneggiati, $immagineNitida, $mossa, $risoluzione);
 
     //get tags id - creo un array di id (interi) che mi permetteranno di associare la foto ai tag
-
     $tags_id_array = get_tags_id($mysqli, $attr_array);
 
 
     //get last id inserted - ottendo l'ultimo id usato per identificare le foto, in modo da costruire poi il nome della foto
     //che verrà salvata in una cartella, il nome sarà del tipo photo + {ID}
-    $photo_number = get_photo_number($mysqli);
-    $photo_base_name .= $photo_number;
-
+    $current_photo_id = get_valid_photo_id($mysqli);
+    $photo_base_name .= $current_photo_id;
 
     //prendo foto e la salvo in foto/
     $photo_extension = "";
@@ -136,8 +137,9 @@ function post($mysqli){
     /*
     {
       "ingredients": ["ing1,", "ing2"],
-      "tags": ["tag1", "tag2"]
-      ..note e original name
+      "tags": ["tag1", "tag2"],
+      "notes": "...",
+      "original_name": "..."
     }
     */
     $ingredient_array = explode(",", $ingredienti);
@@ -149,29 +151,28 @@ function post($mysqli){
     fclose($description_file);
 
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
-    //$photo_number is used as primary key
+    //$current_photo_id is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
     $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI, NOTE) VALUES(?, ?, ?, ?)");
-    $stmt->bind_param("isss", $photo_number, $photo_name, $ingredienti, $note);
+    $stmt->bind_param("isss", $current_photo_id, $photo_name, $ingredienti, $note);
     $stmt -> execute();
 
 
     //inserimento nella tabella associativa molti a molti delle chiavi esterne (photo_id e i vari tag_id)
     foreach($tags_id_array as &$tag_id) {
 
-      //senza chiavi esterne è necessario controllare non vi siano righe uguali
+      //senza chiavi esterne è necessario controllare non vi siano righe uguali -> controllo non vi siano duplicati
       $stmt = $mysqli -> prepare("SELECT * FROM fototag WHERE IDFOTO = ? AND IDTAG = ?");
-      $stmt -> bind_param("ii", $photo_number, $tag_id);
+      $stmt -> bind_param("ii", $current_photo_id, $tag_id);
       $stmt -> execute();
       $stmt->bind_result($id, $fotoid, $tagid);
       $stmt->fetch();
       $stmt->close();
+
       //se non vi sono duplicati associo foto al tag
-
       if($id == NULL) {
-
         $stmt = $mysqli -> prepare("INSERT INTO fototag (ID, IDFOTO, IDTAG) VALUES(NULL, ?, ?)");
-        $stmt -> bind_param("ii", $photo_number, $tag_id);
+        $stmt -> bind_param("ii", $current_photo_id, $tag_id);
         $stmt -> execute();
       }
 
@@ -183,6 +184,7 @@ function post($mysqli){
 
 }
 
+//given a type (originale or modifica) return an array of groups (inclinazione, angolazione, luce...) that belong to that type
 function getTagGroups($mysqli, $tag_type) {
   $tags_group_array = array();
 
@@ -198,6 +200,7 @@ function getTagGroups($mysqli, $tag_type) {
   return $tags_group_array;
 }
 
+//given a group (angolazione..) return an array of tag names that belong to that group (angolata, non_angolata..)
 function getGroupNames($mysqli, $group) {
   $tag_group_names = array();
 
@@ -299,35 +302,20 @@ function getGroupNames($mysqli, $group) {
                                     <i class="fa fa-photo fa-5x"></i>
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="huge"><?php echo printNumFoto($mysqli); ?></div>
+                                    <div class="huge"><?php echo get_current_photo_id($mysqli); ?></div>
                                     <div>Foto inserite</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!--<div class="col-lg-3 col-md-6">
-                    <div class="panel panel-green">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa fa-tasks fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">12</div>
-                                    <div>New</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>-->
 
             </div>
             <!-- /.row -->
             <div class="row">
             <?php
 
-
+                //check if any error
                 if(isset($_GET["inserita"]))
                 {
                     echo '<div class="alert alert-success alert-dismissable">
@@ -379,12 +367,14 @@ function getGroupNames($mysqli, $group) {
 
 
                               <?php
+                                //generate dynamically the input form
+
                                 $html = "";
 
                                 //get original photos tags group
                                 $tag_groups = getTagGroups($mysqli, "originale");
 
-                                //counter keeps track of how many groups have been printed, every 3 groups write a new row
+                                //var used to keep track of how many groups have been printed, every 3 groups write a new row
                                 $current_column = 0;
 
                                 foreach($tag_groups as $group) {
@@ -432,7 +422,6 @@ function getGroupNames($mysqli, $group) {
 
                                   }
 
-
                                   //close class col-md-4 and class form-group
                                   $html .= "</div></div>";
                                   //close row if 3° column
@@ -445,6 +434,7 @@ function getGroupNames($mysqli, $group) {
                                 if($current_column > 0) {
                                   $html .= "</div>";
                                 }
+                                
                                 echo $html;
 
                               ?>

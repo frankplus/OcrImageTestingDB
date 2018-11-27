@@ -11,7 +11,6 @@ if (!isset( $_SESSION['user'])  || !isset( $_GET['id']) ) {
 
 $photo_base_name = "alteration";
 include 'database_info.php';
-//$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
 $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
 // Check connection
 if ($mysqli->connect_error) {
@@ -75,48 +74,6 @@ function generateUrl($nomefile){
     return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
 }
 
-
-//genera i radiobutton in base ai tag esistenti.
-//UTILE PER PAGINA INSERIMENTO
-/*function generaRadio($mysqli)
-{
-    echo $numTag=getNumberTag($mysqli,"M");
-
-    echo '<div class="row">';
-    //colonna tag parte da 0
-    $currentCollumn=0;
-    for($i=0;$i<$numTag;$i++)
-    {
-        if($currentCollumn==3) //Faccio 3 colonne
-        {
-            $currentCollumn=0;
-            echo '</div>
-            <div class="row">';
-        }
-        else
-        {
-            $currentCollumn++;
-        }
-
-        echo '<div class="col-md-4">
-        <div class="form-group">
-            <label>Immagine </label>
-            <div class="radio">
-                <label>
-                <input type="radio" name="immagineNitida" value="nitida" checked="">Nitida
-                </label>
-            </div>
-            <div class="radio">
-                <label>
-                <input type="radio" name="immagineNitida" value="sfuocata">Sfuocata
-                </label>
-            </div>
-        </div>
-        </div>';
-
-    }
-    echo '</div>';
-}*/
 
 //genero i radiobutton dinamicamente
 function generaRadio($mysqli)
@@ -225,7 +182,7 @@ function post($mysqli){
       array_push($alteration_tags_array, getTagName($mysqli, $modifica));
     }
     $alteration_description_json = array("tags" => $alteration_tags_array, "notes" => $note);
-    
+
     $alteration_name = $photo_base_name . '.' . $photo_extension;
 
     //set new JSON obj
@@ -246,48 +203,6 @@ function post($mysqli){
     fwrite($original_photo_description_file, $original_photo_description_string);
     fclose($original_photo_description_file);
 
-    /*
-    $original_photo_name = "foto" . $idFotoOrginale;
-
-    //salvo descrizione in formato JSON della foto modificata (alterationID.txt) e aggiorno il file descrittivo della foto originale, aggiungendo il nome di questa alterazione
-    //costruisco array con i nomi dei tag di modifica
-    $alteration_tags_array = array();
-    foreach($modifiche as $modifica) {
-      array_push($alteration_tags_array, getTagName($mysqli, $modifica));
-    }
-
-    //in ordine nel JSON: nome foto originale, tags, note, nome originale
-    $description_json = json_encode(array("original_photo" => $original_photo_name, "tags" => $alteration_tags_array, "notes" => $note));
-    //create and write file with json data
-    $description_path = "foto/" . $photo_base_name . ".txt";
-    $description_file = fopen($description_path, "w");
-    fwrite($description_file, $description_json);
-    fclose($description_file);
-
-    //update original photo description adding alteration
-    //read description and decode json
-    $original_photo_description_path = "foto/" . $original_photo_name . ".txt";
-    $original_photo_description_string = file_get_contents($original_photo_description_path, true);
-    if(!$original_photo_description_string) {
-      throw new Exception("Descrizione foto originale non trovata");
-    }
-    $original_photo_description_json = json_decode($original_photo_description_string, true); //true because i want an associative array
-    //add alteration - if alterations field doesn't exist then add it
-    if($original_photo_description_json["alterations"] != null) {
-      array_push($original_photo_description_json["alterations"], $photo_base_name);
-    }
-    else {
-      //add alteration field
-      $original_photo_description_json["alterations"] = array($photo_base_name);
-    }
-
-    //save changes
-    $original_photo_description_string = json_encode($original_photo_description_json);
-    $original_photo_description_file = fopen($original_photo_description_path, "w");
-    fwrite($original_photo_description_file, $original_photo_description_string);
-    fclose($original_photo_description_file);
-    */
-
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
     $photo_name =$photo_base_name . '.' . $photo_extension;
@@ -301,12 +216,9 @@ function post($mysqli){
     $stmt -> execute();
 
     foreach($modifiche as $modifica) {
-    {
         $stmt = $mysqli -> prepare("INSERT INTO fototag (IDFOTO, IDTAG) VALUES(?, ?)");
         $stmt->bind_param("ii", $photo_number, $modifica);
         $stmt -> execute();
-    }
-
     }
 
     //close connection
