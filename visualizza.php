@@ -12,7 +12,7 @@
     include 'database_info.php';
 
     $pag="";
-    $immaginiPerPagina="2"; //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
+    $immaginiPerPagina="10"; //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
     if(!isset($_GET["pag"]))
     {
         $nuovaQuery = $_SERVER['QUERY_STRING'];
@@ -66,6 +66,7 @@
                 WHERE NOME IN ($tags) 
             )
             GROUP BY IDFOTO HAVING COUNT(IDFOTO) = ".$num_gruppi_tag;
+        
         $result = mysqli_query($mysqli, $selectfotosql);
         $rows = mysqli_num_rows($result);
         mysqli_close($mysqli);
