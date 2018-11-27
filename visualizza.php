@@ -63,7 +63,7 @@
             WHERE foto.INGREDIENTI != '' AND IDTAG IN (
                 SELECT ID 
                 FROM tag 
-                WHERE NOME IN ($tags) 
+                WHERE TIPO='originale' AND NOME IN ($tags) 
             )
             GROUP BY IDFOTO HAVING COUNT(IDFOTO) = ".$num_gruppi_tag;
         $result = mysqli_query($mysqli, $selectfotosql);
@@ -183,7 +183,7 @@
             WHERE foto.INGREDIENTI != '' AND IDTAG IN (
                 SELECT ID 
                 FROM tag 
-                WHERE NOME IN ($tags) 
+                WHERE TIPO='originale' AND NOME IN ($tags) 
             )
             GROUP BY IDFOTO HAVING COUNT(IDFOTO) = $num_gruppi_tag
             LIMIT $pagina,$immaginiPerPagina
