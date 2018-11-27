@@ -1,4 +1,4 @@
-# ingegneriadelsoftware-gruppo3
+# OcrImageTestingDB
 Repository del terzo gruppo del corso di ingegneria del software
 
 ## Credenziali di accesso database
