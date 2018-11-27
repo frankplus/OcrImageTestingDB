@@ -1,11 +1,18 @@
 <?php
+    /**
+     * Pagina di visualizzazione filtrata delle foto 
+     * Author: Francesco Pham
+     */
+
     session_start();
     if (!isset( $_SESSION['user'] ) ) {
-    header("location: /index.php");
+        header("location: /index.php");
     }
+
+    include 'database_info.php';
+
     $pag="";
-    //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
-    $immaginiPerPagina="2";
+    $immaginiPerPagina="2"; //IMPOSTA QUANTE IMMAGINI PER PAGINA VUOI
     if(!isset($_GET["pag"]))
     {
         $nuovaQuery = $_SERVER['QUERY_STRING'];
@@ -13,8 +20,15 @@
     }
 
 
-    include 'database_info.php';
-    function get(){
+    //IMPOSTA IL NUMERO DI GRUPPI DI TAG (i gruppi sono ad esempio angolazione, inclinazione, risoluzione..)
+    $num_gruppi_tag = 9; 
+
+    
+    /*
+        Accesso a database generazione array di foto e visualizzazione
+        Author: Francesco Pham
+    */
+    function visualizzaFoto(){
         
         //$link = mysqli_connect($dbhost, $dbuser, $dbpass) or die("Unable to Connect to '$dbhost'");
         $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
@@ -31,12 +45,41 @@
         mysqli_close($mysqli);
     }
 
+
+    /*
+        Funzione che ritorna il numero totale di foto da visualizzare per poter effettuare la paginazione
+    */
+    function numeroRighe()
+    {
+        $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
+        // Check connection
+        if ($mysqli->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+        $tags=generaStringaTag();
+        global $num_gruppi_tag;
+        $selectfotosql = "SELECT foto.ID, foto.INGREDIENTI FROM foto
+            INNER JOIN fototag ON foto.ID = fototag.IDFOTO
+            WHERE foto.INGREDIENTI != '' AND IDTAG IN (
+                SELECT ID 
+                FROM tag 
+                WHERE NOME IN ($tags) 
+            )
+            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = ".$num_gruppi_tag;
+        $result = mysqli_query($mysqli, $selectfotosql);
+        $rows = mysqli_num_rows($result);
+        mysqli_close($mysqli);
+        return $rows;
+    }
+
+
+    /*
+        qui viene fatta una selezione filtrata per nome: 
+        viene cercato la foto che possiede tale nome (il nome della foto coincide 
+        con il nome del file estensione compresa)
+        Author: Francesco Pham
+    */
     function selezionaFotoPerNome($mysqli){
-        /*
-            qui viene fatta una selezione filtrata per nome: 
-            viene cercato la foto che possiede tale nome (il nome della foto coincide 
-            con il nome del file estensione compresa)
-        */
         $nomefoto = $_GET['nomeFoto'];
         $sql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI FROM foto WHERE foto.NOME = '$nomefoto'";
         $result = mysqli_query($mysqli, $sql);
@@ -48,13 +91,15 @@
         return $fotoarray;
     }
 
+
+    /*
+        creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
+        i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
+        Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.
+        Author: Francesco Pham
+    */
     function generaStringaTag()
     {
-        /*
-            creo un array di attributi che le immagini cercate devono avere in base ai filtri applicati,
-            i nomi degli attributi devono corrispondere a quelli presenti nella tabella tag del database.
-            Se degli attributi non vengono specificati, non viene applicato il filtro per quell'attributo.  
-        */
         $tags_array = array();
         if(isset($_GET['inclinazione'])){
             if($_GET['inclinazione'] == 'si') array_push($tags_array, "inclinata");
@@ -107,38 +152,17 @@
         $tags = "'".implode("','", $tags_array)."'";
         return $tags;
     }
-
-    function numeroRighe()
-    {
-        $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
-        // Check connection
-        if ($mysqli->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-        $tags=generaStringaTag();
-        $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI, foto.NOTE FROM foto
-            INNER JOIN fototag ON foto.ID = fototag.IDFOTO
-            WHERE IDTAG IN (
-                SELECT ID 
-                FROM tag 
-                WHERE NOME IN ($tags) 
-            )
-            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9";
-        $result = mysqli_query($mysqli, $selectfotosql);
-        $rows = mysqli_num_rows($result);
-        mysqli_close($mysqli);
-        return $rows;
-
-    }
     
+
+    /*
+        Questa funzione seleziona le foto dal database e le inserisce in un'array 
+        pronto per essere visualizzato.
+        La selezione è filtrata per attributi (tag): alcuni attributi possono 
+        anche non essere specificati, se ciò avviene la ricerca non viene 
+        filtrata per tali attributi.
+        Author: Francesco Pham
+    */
     function generaListaFotoFiltrata($mysqli){
-        /*
-            Questa funzione seleziona le foto dal database e le inserisce in un'array 
-            pronto per essere visualizzato.
-            La selezione è filtrata per attributi (tag): alcuni attributi possono 
-            anche non essere specificati, se ciò avviene la ricerca non viene 
-            filtrata per tali attributi.
-        */
         $tags=generaStringaTag();
         global $immaginiPerPagina;
         $pagina="";
@@ -150,16 +174,18 @@
         {
             $pagina="0";
         }
-
+        
         //creazione della query
+        //il controllo foto.INGREDIENTI!='' serve a escludere le foto modificate
+        global $num_gruppi_tag;
         $selectfotosql = "SELECT foto.ID,foto.NOME,foto.INGREDIENTI, foto.NOTE  FROM foto
             INNER JOIN fototag ON foto.ID = fototag.IDFOTO
-            WHERE IDTAG IN (
+            WHERE foto.INGREDIENTI != '' AND IDTAG IN (
                 SELECT ID 
                 FROM tag 
                 WHERE NOME IN ($tags) 
             )
-            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = 9
+            GROUP BY IDFOTO HAVING COUNT(IDFOTO) = $num_gruppi_tag
             LIMIT $pagina,$immaginiPerPagina
         ";
 
@@ -169,7 +195,10 @@
         return $fotolist;
     }
     
-    //selezione dei tag corrispondenti ad una foto
+    /*
+        selezione dei tag corrispondenti ad una foto
+        Author: Francesco Pham
+    */
     function generateTagList($mysqli, $idfoto){
         $sql = "SELECT tag.NOME FROM tag
                 INNER JOIN fototag ON tag.ID = fototag.IDTAG
@@ -181,7 +210,10 @@
         return $taglist;
     }
 
-    //generazione del codice html con la lista di tag
+    /*
+        generazione del codice html con la lista di tag
+        Author: Francesco Pham
+    */
     function printTagList($taglist){
         $htmltaglist = '';
         foreach($taglist as $tag){
@@ -190,12 +222,57 @@
         return $htmltaglist;
     }
 
+    /*
+        selezione delle foto modificate e i loro tag di modifica
+        Author: Francesco Pham
+    */
+    function generateEditedPhotos($mysqli, $idfotoorig){
+        $sql = "SELECT foto.NOME, tag.NOME AS TAGNOME
+            FROM tag
+            INNER JOIN fototag ON tag.ID = fototag.IDTAG
+            INNER JOIN modifiche ON fototag.IDFOTO = modifiche.IDMODIFICATA
+            INNER JOIN foto ON modifiche.IDMODIFICATA = foto.ID
+            WHERE modifiche.IDORIGINALE = $idfotoorig AND tag.TIPO='modifica'";
+        $result = mysqli_query($mysqli, $sql);
+        $photolist = mysqli_fetch_all($result,MYSQLI_ASSOC);
+        mysqli_free_result($result);
+
+        $assoc = array();
+        foreach($photolist as $photo){
+            if(!array_key_exists($photo['NOME'], $assoc)) {
+                $assoc[$photo['NOME']] = array();
+            }
+            array_push($assoc[$photo['NOME']], $photo['TAGNOME']);
+        }
+        return $assoc;
+    }
+
+    /*
+        stampa della lista delle foto modificate.
+        Author: Francesco Pham
+    */
+    function printEditedPhotos($modphotolist){
+        $html = '';
+        foreach($modphotolist as $fotonome => $array){
+            $html .= '<li>';
+            $html .= '<a href="'.generateUrl($fotonome).'">'. $fotonome . '</a>: ';
+            foreach($array as $tagmodifica){
+                $html .= $tagmodifica . ' ';
+            }
+            $html .= '</li>';
+        }
+        return $html;
+    }
+
     //generazione dell'url dove reperire i file delle foto
     function generateUrl($nomefile){
         return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
     }
 
-    //stampa in html della lista delle foto selezionate e delle corrispondenti tag
+    /*
+        stampa in html della lista delle foto selezionate e dei corrispondenti tag
+        Author: Francesco Pham
+    */
     function stampaListaFoto($mysqli, $fotolist){
         echo'<div class="row">';
         $i=0;
@@ -215,13 +292,16 @@
                         <div class="panel-body" style="font-size: 17px;">
                             <img src="'.generateUrl($foto['NOME']).'"
                                 style="width: 100%; height: auto;"></br></br>
-                            <!--Consigliato da Leonardo Rossi di suddividere i tag per lista-->
                             <b>Tag</b>:
                             <ul>
                                 '.printTagList(generateTagList($mysqli,$foto['ID'])).'
                             </ul>
                             <b>Ingredienti</b>: '.$foto['INGREDIENTI'].'<br>
                             <b>Note</b>: '.$foto['NOTE'].'<br>
+                            <b>Modifiche:</b><br>
+                            <ul>
+                                '.printEditedPhotos(generateEditedPhotos($mysqli, $foto['ID'])).'
+                            </ul>
                             <a href="modifica.php?id='.$foto['ID'].'" type="submit" class="btn btn-primary">Modifica</a> 
                         </div>
                     </div>
@@ -494,7 +574,7 @@
 
                     $numeroRighe=numeroRighe(); //numero di foto uscite dal filtro
                     echo "<h3>Risultato ricerca: $numeroRighe foto</h3><br>";
-                    get(); //accesso a database, selezione foto e stampa dei risultati
+                    visualizzaFoto(); //accesso a database, selezione foto e stampa dei risultati
                    
                     
                     
