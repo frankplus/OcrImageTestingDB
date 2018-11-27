@@ -118,6 +118,7 @@ function generateUrl($nomefile){
     echo '</div>';
 }*/
 
+//genero i radiobutton dinamicamente
 function generaRadio($mysqli)
 {
 
@@ -146,7 +147,7 @@ function generaRadio($mysqli)
 
 }
 
-
+//vedo se ci sono modifiche
 if(isset($_POST["modifiche"]))
 {
 
