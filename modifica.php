@@ -1,5 +1,6 @@
 <?php
 
+//Mostro gli errori e controllo la sessione
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -8,7 +9,7 @@ if (!isset( $_SESSION['user'])  || !isset( $_GET['id']) ) {
     header("location: /index.php");
 }
 
-
+//prefisso del nome della foto modificata che voglio salvare
 $photo_base_name = "alteration";
 include 'database_info.php';
 $mysqli=mysqli_connect($GLOBALS['dbhost'],$GLOBALS['dbuser'],$GLOBALS['dbpass'],$GLOBALS['dbname']);
@@ -17,6 +18,7 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+//Verifico che la foto di cui voglio mostrare le modifiche esista veramente.
 $riga=getFotoFields($mysqli,$_GET['id']);
 if($riga==null)
 {
@@ -39,7 +41,12 @@ function getNumberTag($mysqli,$tagType){
     return $taglist[0];
 }
 
-//Restituisce tutti i tag del tipo specificato
+/**
+ * Restituisce tutti i tag del tipo specificato (i tipi sono 2, quelli per le foto caricate originali e quelle delle foto di modifica)
+ * @param tagType contiene il timo di tag che voglio mostrare
+ * @param idOriginale contiene l'id della foto originale di cui voglio mostrare i tag di modifica 
+ * @return tagarray contenete i tag specificati da tagType della foto specificata da idOriginale
+ */
 function getTagsName($mysqli,$tagType, $idOriginale){
 
     $sql = "
@@ -61,7 +68,12 @@ function getTagsName($mysqli,$tagType, $idOriginale){
     return $tagarray;
 
 }
-//restituisce il nome di un tag
+//
+/**
+ * restituisce il nome di un tag
+ * @param tagId id del tag di cui voglio conoscere il nome
+ * @return * il nome del tag
+ */
 function getTagName($mysqli, $tagId) {
   $sql = "SELECT NOME from tag WHERE ID = '$tagId'";
   $result = mysqli_query($mysqli, $sql);
@@ -69,16 +81,21 @@ function getTagName($mysqli, $tagId) {
 
 }
 
-//generazione dell'url dove reperire i file delle foto
+
+/**
+ * generazione dell'url dove reperire i file delle foto
+ */
 function generateUrl($nomefile){
     return 'http://'.$_SERVER['HTTP_HOST'].'/foto/'.$nomefile;
 }
 
 
-//genero i radiobutton dinamicamente
+/** 
+ * genero i radiobutton dinamicamente per l'inserimento di nuove modifche
+ * Predefinito che non posso aggiungere più modifiche dello stesso tipo.
+*/
 function generaRadio($mysqli)
 {
-
     $taglist=getTagsName($mysqli,"modifica",$_GET['id']);
 
     if(count($taglist)==0)
@@ -104,19 +121,22 @@ function generaRadio($mysqli)
 
 }
 
-//vedo se ci sono modifiche
+/**
+ * Verifico se sto caricando una modifica
+ */
 if(isset($_POST["modifiche"]))
 {
-
     try {
         post($mysqli);
         header("location: /visualizza.php?inserita");
     } catch (Exception $e) {
       header("location: /visualizza.php?errore=". $e->getMessage());
     }
-
-
 }
+
+/**
+ * Metodo per postare una nova modfica
+ */
 function post($mysqli){
     global $photo_base_name;
     $modifiche = $_POST["modifiche"];
@@ -205,16 +225,20 @@ function post($mysqli){
 
     //insert photo attributes - inserimento nel db degli attributi necessari per reperire la foto
     //$photo_number is used as primary key
+
+    //Salvo la foto
     $photo_name =$photo_base_name . '.' . $photo_extension;
     $stmt = $mysqli -> prepare("INSERT INTO foto (ID, NOME, INGREDIENTI, NOTE) VALUES(?, ?, ?, ?)");
     $val="";
     $stmt->bind_param("isss", $photo_number, $photo_name, $val, $note);
     $stmt -> execute();
 
+    //Associo la foto di modifica a quella originale
     $stmt = $mysqli -> prepare("INSERT INTO modifiche (IDORIGINALE, IDMODIFICATA) VALUES(?, ?)");
     $stmt->bind_param("ii", $idFotoOrginale, $photo_number);
     $stmt -> execute();
 
+    //Salvo i tag di modifica per la foto modificata
     foreach($modifiche as $modifica) {
         $stmt = $mysqli -> prepare("INSERT INTO fototag (IDFOTO, IDTAG) VALUES(?, ?)");
         $stmt->bind_param("ii", $photo_number, $modifica);
@@ -225,6 +249,10 @@ function post($mysqli){
     mysqli_close($mysqli);
 
 }
+
+/**
+ * Ottiene l'ultimo id dell'ultima foto
+ */
 function get_photo_number($mysqli) {
     $photo_number = 0;
     $sql = "SELECT MAX(ID) FROM foto";
@@ -235,6 +263,10 @@ function get_photo_number($mysqli) {
     }
     return $photo_number;
   }
+
+/**
+ * Verifico se è una foto
+ */
 function is_image($photo_extension) {
     $expensions= array("jpeg","jpg","png");
     if(!in_array($photo_extension,$expensions)){

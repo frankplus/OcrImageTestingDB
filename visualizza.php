@@ -577,8 +577,6 @@
                     echo "<h3>Risultato ricerca: $numeroRighe foto</h3><br>";
                     visualizzaFoto(); //accesso a database, selezione foto e stampa dei risultati
                    
-                    
-                    
                 }
                 ?>
 
@@ -589,14 +587,18 @@
                             
 
                             <?php 
-                                    
+                                    //Gestione delle pagine
+                                    //Author: Stefano Romanello
                                     
                                     global $immaginiPerPagina;
+
+                                    //Costruisco la nuova url salvando i valori GET attuali e diminuisco di 1 dalla pagina attuale
                                     parse_str($_SERVER['QUERY_STRING'], $query_string);
                                     $query_string['pag'] = ($query_string['pag']-$immaginiPerPagina);
                                     $nuovaQueryIndietro = http_build_query($query_string);
 
                                     $pagina = $_GET["pag"];
+                                    //Disabilito il pulsante indietro se sono sulla prima pagina
                                     if($pagina==0)
                                     {
                                         echo '<li class="paginate_button previous disabled" aria-controls="dataTables-example"
@@ -610,20 +612,19 @@
 
                                     //Stampo tutte le pagine
                                     
-
-                                    //1   2    3    4    5
-                                    //0   2    4    6    8
-
-
-                                    $numeroPagine = ($numeroRighe/$immaginiPerPagina); // 2 Foto per pagina
+                                    //Calcolo quante pagine ho
+                                    $numeroPagine = ($numeroRighe/$immaginiPerPagina); 
                                     $ultimaPagina = false;
                                     for($i=0;$i<$numeroPagine;$i++)
                                     {
+                                        //per ogni pagina costrusco l'url
                                         parse_str($_SERVER['QUERY_STRING'], $query_string);
                                         $pagAttuale=$query_string['pag'];
-                                        $query_string['pag'] = ($i*$immaginiPerPagina);
+                                        $query_string['pag'] = ($i*$immaginiPerPagina); //la "pagina" non è 0 1 2 3 ma 0, 10, 20 in base al numero di foto per pagina
                                         $rdr_str = http_build_query($query_string);
                                       
+                                        //Mostro il pulsante in blu quando sono sulla pagina attuale. 
+                                        //Se l'ultimo pulsante che inserisco è blu allora è anche l'ultima pagina inserita.
                                         if(($pagAttuale/$immaginiPerPagina)==($i))
                                         {
                                             echo '<li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="http://localhost/visualizza.php?'.$rdr_str.'">'.($i+1).'</a></li>';
@@ -638,7 +639,7 @@
                                         
                                     }
 
-                                    
+                                    //Se sono sull'ultima pagina non creo il pulsante per andare alla successiva
                                     if($ultimaPagina==true)
                                     {
                                         echo '<li class="paginate_button next disabled" aria-controls="dataTables-example" tabindex="0"><a
